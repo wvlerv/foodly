@@ -29,7 +29,7 @@ public class Dish {
     @Column(nullable = false)
     private BigDecimal price;
 
-    private double weight;
+    private BigDecimal weight;
 
     @Column(name = "image_url")
     private String imageUrl;
@@ -37,10 +37,13 @@ public class Dish {
     @Column(name = "is_available")
     private boolean isAvailable = true;
 
-    private double calories;
-    private double proteins;
-    private double fats;
-    private double carbohydrates;
+    private BigDecimal calories;
+    private BigDecimal proteins;
+    private BigDecimal fats;
+    private BigDecimal carbohydrates;
+
+    @ElementCollection
+    private List<String> allergens;
 
     @OneToMany(
             mappedBy = "dish",

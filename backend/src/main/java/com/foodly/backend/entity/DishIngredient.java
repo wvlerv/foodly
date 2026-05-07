@@ -2,6 +2,8 @@ package com.foodly.backend.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.math.BigDecimal;
 import java.util.UUID;
 
 @Entity
@@ -26,5 +28,5 @@ public class DishIngredient {
     private Ingredient ingredient;
 
     @Column(name = "weight_in_grams", nullable = false)
-    private double weightInGrams;
+    private BigDecimal weightInGrams;
 }
