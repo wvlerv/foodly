@@ -1,0 +1,325 @@
+/**
+ * MenuCatalog Component Styles
+ * Grid spacing for premium card layout
+ */
+/* 1. Виносимо алергени на самий верх (після .menu-catalog__filters) */
+.allergen-tags {
+  margin: 20px 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  justify-content: center; /* Центруємо теги теж */
+}
+
+.allergen-tags__label {
+  font-weight: 600;
+  color: #4b5563;
+  margin-right: 8px;
+}
+
+.allergen-tag {
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: 1px solid #d1d5db;
+  background: white;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+  color: #374151;
+}
+
+.allergen-tag.active {
+  background: #ef4444; /* Гарний червоний */
+  color: white;
+  border-color: #ef4444;
+  box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
+}
+
+.allergen-tag:hover:not(.active) {
+  border-color: #ef4444;
+  color: #ef4444;
+}
+
+/* 2. Додаємо контейнер, який буде розтягуватися на всю висоту */
+.menu-content {
+  min-height: 50vh; /* Займає мінімум половину висоти екрану */
+  display: flex;
+  flex-direction: column;
+}
+
+/* 3. Оновлюємо центрування порожнього стану */
+.menu-catalog__empty {
+  margin: auto; /* Це магічно центрує елемент всередині flex-контейнера .menu-content */
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.menu-catalog__empty svg,
+.menu-catalog__empty .empty-icon {
+  display: block;
+  margin: 0 auto 28px auto; /* більший відступ під іконкою */
+}
+
+.menu-catalog__empty h2 {
+  margin: 0 0 12px 0;
+  font-size: 1.6rem;
+  color: #333;
+}
+
+.menu-catalog__empty p {
+  margin-top: 10px;
+  font-size: 18px;
+  color: #666;
+}
+
+.menu-catalog {
+  max-width: 1400px; /* збільшено для ширших карточок на ПК */
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+.menu-catalog__filters {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+}
+
+.menu-catalog__switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: 14px; /* зробити розмір шрифту як у Select All */
+  color: #334155;
+}
+
+.menu-catalog__select {
+  padding: 8px 35px 8px 15px;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  font-size: 14px;
+  color: #1f2937;
+  background: #fff;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 1em;
+  min-width: 160px;
+  transition: border-color 0.2s;
+}
+
+.menu-catalog__select:hover {
+  border-color: #ef4444;
+}
+
+.menu-catalog__input {
+  height: 38px;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  padding: 0 10px;
+  width: 120px;
+}
+
+.menu-catalog__input {
+  width: 140px;
+}
+
+.menu-catalog__input:disabled {
+  background: #f3f4f6;
+  color: #9ca3af;
+}
+
+.filter-button {
+  padding: 10px 20px;
+  border: 2px solid #e0e0e0;
+  background-color: #ffffff;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: #555;
+}
+
+.filter-button:hover {
+  border-color: #667eea;
+  color: #667eea;
+}
+
+.filter-button--active {
+  background-color: #667eea;
+  border-color: #667eea;
+  color: #ffffff;
+}
+
+.menu-catalog__error {
+  background-color: #fff3cd;
+  border: 1px solid #ffc107;
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin-bottom: 24px;
+  color: #856404;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.menu-catalog__error p {
+  margin: 0;
+}
+
+.menu-catalog__loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 20px;
+  color: #666;
+}
+
+.menu-catalog__loading p {
+  margin-top: 20px;
+  font-size: 16px;
+  color: #666;
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid #f0f0f0;
+  border-top: 4px solid #667eea;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.menu-catalog__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 30px;
+  padding: 40px 20px;
+}
+
+.menu-catalog__empty {
+  text-align: center;
+  padding: 80px 20px;
+  color: #999;
+}
+
+.menu-catalog__empty p {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.menu-catalog__empty-subtitle {
+  font-size: 14px;
+  color: #bbb;
+  margin-top: 8px !important;
+}
+
+@media (min-width: 1200px) {
+  .menu-catalog__grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 30px;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1199px) {
+  .menu-catalog {
+    padding: 36px 16px;
+  }
+
+  .menu-catalog__grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 26px;
+    padding: 32px 16px;
+  }
+}
+
+@media (max-width: 767px) {
+  .menu-catalog {
+    padding: 30px 12px;
+  }
+
+  .menu-catalog__filters {
+    margin-bottom: 20px;
+    gap: 8px;
+  }
+
+  .filter-button {
+    padding: 8px 16px;
+    font-size: 13px;
+  }
+
+  .menu-catalog__switch,
+  .menu-catalog__input,
+  .menu-catalog__select {
+    width: 100%;
+    max-width: 340px;
+  }
+
+  .menu-catalog__grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    padding: 24px 12px;
+  }
+
+  .menu-catalog__loading {
+    padding: 60px 20px;
+  }
+
+  .menu-catalog__empty {
+    padding: 60px 16px;
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .menu-catalog {
+    padding: 24px 10px;
+  }
+
+  .menu-catalog__grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    padding: 20px 10px;
+  }
+
+  .menu-catalog__loading {
+    padding: 40px 16px;
+  }
+
+  .menu-catalog__loading p {
+    font-size: 14px;
+  }
+
+  .spinner {
+    width: 40px;
+    height: 40px;
+  }
+
+  .menu-catalog__empty {
+    padding: 40px 16px;
+  }
+
+  .menu-catalog__empty p {
+    font-size: 16px;
+  }
+}

@@ -1,0 +1,72 @@
+[
+  {
+    "id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+    "name": "Grilled Chicken Breast",
+    "description": "Juicy grilled chicken breast with herb seasoning",
+    "price": 12.99,
+    "weight": 200,
+    "imageUrl": "https://images.unsplash.com/photo-1598103442097-8b74394b95c6?w=500&h=400&fit=crop",
+    "isAvailable": true,
+    "calories": 350,
+    "proteins": 45,
+    "fats": 10,
+    "carbohydrates": 0,
+    "allergens": ["Gluten"]
+  },
+  {
+    "id": "e47ac10b-58cc-4372-a567-0e02b2c3d480",
+    "name": "Caesar Salad",
+    "description": "Fresh greens with homemade Caesar dressing and croutons",
+    "price": 9.99,
+    "weight": 250,
+    "imageUrl": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&h=400&fit=crop",
+    "isAvailable": true,
+    "calories": 450,
+    "proteins": 20,
+    "fats": 25,
+    "carbohydrates": 30,
+    "allergens": ["Dairy", "Eggs"]
+  },
+  {
+    "id": "d47ac10b-58cc-4372-a567-0e02b2c3d481",
+    "name": "Chocolate Cake",
+    "description": "Rich dark chocolate cake with frosting",
+    "price": 7.99,
+    "weight": 150,
+    "imageUrl": "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=500&h=400&fit=crop",
+    "isAvailable": true,
+    "calories": 600,
+    "proteins": 8,
+    "fats": 30,
+    "carbohydrates": 75,
+    "allergens": ["Dairy", "Nuts"]
+  },
+  {
+    "id": "c47ac10b-58cc-4372-a567-0e02b2c3d482",
+    "name": "Quinoa Buddha Bowl",
+    "description": "Nutritious bowl with quinoa, roasted vegetables, and tahini dressing",
+    "price": 11.99,
+    "weight": 350,
+    "imageUrl": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&h=400&fit=crop",
+    "isAvailable": true,
+    "calories": 420,
+    "proteins": 18,
+    "fats": 12,
+    "carbohydrates": 52,
+    "allergens": ["Sesame"]
+  },
+  {
+    "id": "b47ac10b-58cc-4372-a567-0e02b2c3d483",
+    "name": "Grilled Salmon",
+    "description": "Fresh Atlantic salmon fillet with lemon and dill",
+    "price": 16.99,
+    "weight": 220,
+    "imageUrl": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&h=400&fit=crop",
+    "isAvailable": true,
+    "calories": 380,
+    "proteins": 42,
+    "fats": 20,
+    "carbohydrates": 2,
+    "allergens": ["Fish"]
+  }
+]

@@ -1,0 +1,434 @@
+/* Додаткові стилі для ціни та кнопки */
+
+/* Оновлена синя кнопка та акцент на ціні */
+
+.dish-card__price {
+  color: #2563eb; /* Змінюємо ціну на синю, щоб вона пасувала до кнопки */
+  font-size: 1.4rem;
+}
+
+.dish-card__add-btn {
+  margin-top: 20px;
+  width: 100%;
+  padding: 12px;
+  background: #111827; /* Темний колір у спокої */
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.dish-card__add-btn:hover:not(:disabled) {
+  background: #3b82f6; /* Гарний синій колір при наведенні */
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); /* Синя тінь */
+}
+
+.dish-card__add-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.dish-card__add-btn:disabled {
+  background: #e5e7eb;
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+
+/* Якщо страви немає в наявності, картка стає трохи прозорою */
+.dish-card--unavailable {
+  opacity: 0.75;
+}
+
+/* Фікс, щоб тіло картки займало весь простір і кнопка завжди була внизу */
+.dish-card__body {
+  flex-grow: 1;
+}
+
+.dish-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  min-height: 480px;
+  height: 100%;
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+  transition:
+    transform 0.22s ease,
+    box-shadow 0.22s ease,
+    border-color 0.22s ease;
+}
+
+.dish-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+  border-color: #e6e6e6;
+}
+
+.dish-card__image-wrapper {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: #f3f4f6;
+}
+
+.dish-card__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border-radius: 12px 12px 0 0;
+}
+
+.dish-card__unavailable {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: rgba(17, 24, 39, 0.8);
+  color: #fff;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.dish-card__allergen-alert {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: help;
+  padding: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.dish-card__body {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding: 20px;
+}
+
+.dish-card__name {
+  margin: 0 0 12px 0;
+  font-size: 1.08rem;
+  line-height: 1.22;
+  font-weight: 700;
+  color: #111827;
+  letter-spacing: -0.02em;
+}
+
+.dish-card__description {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  min-height: 3em;
+  margin: 0 0 9px 0; /* більше простору між описом і ціною */
+  color: #666;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.dish-card__meta-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 8px;
+  margin-bottom: 12px; /* зменшено відстань між ціною і блоком КБЖУ */
+}
+
+.dish-card__price {
+  margin: 0;
+  font-size: 1.25rem;
+  line-height: 1;
+  font-weight: 800;
+  color: #16a34a;
+  letter-spacing: -0.03em;
+}
+
+.dish-card__allergen-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.dish-card__allergen-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  background: #ff4444; /* Акцентний червоний для плашок алергенів */
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  color: #ffffff;
+  border: none;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.dish-card__allergen-badge svg {
+  color: #ffffff;
+  width: 14px;
+  height: 14px;
+}
+
+.dish-card__nutrition {
+  margin-top: 8px; /* зменшено відстань від ціни до КБЖУ */
+  padding-top: 8px;
+  border-top: 1px solid #eee;
+  background: #fafafa;
+  border-radius: 10px;
+  padding: 10px;
+}
+
+/* Покращене відображення КБЖУ: дозвіл переносів і обмеження ширини лейблів */
+.nutrition-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+  font-size: 0.75rem;
+  color: #4b5563;
+}
+
+.nutrition-label {
+  font-weight: 600;
+  max-width: 66%;
+  white-space: normal;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-break: break-word;
+  font-size: 0.72rem; /* трохи менший шрифт для лейблів */
+}
+
+.nutrition-value {
+  font-weight: 600;
+  flex: 0 0 auto; /* фіксуємо розмір значення, щоб не обтікав */
+  font-size: 0.75rem;
+  color: #111827;
+}
+
+.nutrition-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+  font-size: 0.75rem;
+  color: #4b5563;
+}
+
+.nutrition-label,
+.nutrition-value {
+  font-weight: 600;
+}
+
+.nutrition-value {
+  color: #111827;
+}
+
+.nutrition-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 4px;
+}
+
+.nutrition-item {
+  background: #fff;
+  border: 1px solid #eceff1;
+  border-radius: 8px;
+  padding: 6px;
+  text-align: center;
+}
+
+.nutrition-item__label {
+  margin-bottom: 2px;
+  font-size: 0.64rem;
+  font-weight: 700;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.nutrition-item__value {
+  margin-bottom: 2px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+.nutrition-item__percentage {
+  margin-bottom: 3px;
+  font-size: 0.64rem;
+  color: #9ca3af;
+}
+
+.nutrition-item__bar {
+  width: 100%;
+  height: 3px;
+  background: #e5e7eb;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.nutrition-item__bar-fill {
+  height: 100%;
+  border-radius: 999px;
+}
+
+.protein-bar {
+  background: #ef4444;
+}
+
+.fat-bar {
+  background: #f59e0b;
+}
+
+.carbs-bar {
+  background: #3b82f6;
+}
+
+@media (min-width: 769px) {
+  .dish-card__body {
+    padding: 20px;
+  }
+
+  .dish-card__name {
+    font-size: 1.12rem;
+    font-weight: 700;
+  }
+
+  .dish-card__price {
+    font-size: 1.28rem;
+  }
+
+  .dish-card__nutrition {
+    padding: 12px;
+  }
+
+  .nutrition-item {
+    padding: 7px;
+  }
+}
+
+@media (max-width: 768px) {
+  .dish-card {
+    min-height: 480px;
+  }
+
+  .dish-card__body {
+    padding: 18px;
+  }
+
+  .dish-card__name {
+    font-size: 1rem;
+  }
+
+  .dish-card__description {
+    font-size: 0.88rem;
+  }
+
+  .dish-card__price {
+    font-size: 1.16rem;
+  }
+
+  .dish-card__nutrition {
+    padding: 9px;
+  }
+}
+
+@media (max-width: 480px) {
+  .dish-card {
+    min-height: 480px;
+  }
+
+  .dish-card__body {
+    padding: 16px;
+  }
+
+  .dish-card__name {
+    font-size: 0.98rem;
+  }
+
+  .dish-card__description {
+    min-height: 3em;
+    font-size: 0.86rem;
+  }
+
+  .dish-card__price {
+    font-size: 1.1rem;
+  }
+
+  .dish-card__allergen-badge {
+    font-size: 0.72rem;
+    padding: 2px 6px;
+  }
+
+  .dish-card__nutrition {
+    padding: 8px;
+  }
+
+  .nutrition-item {
+    padding: 5px;
+  }
+}
+
+@media (max-width: 359px) {
+  .dish-card__body {
+    padding: 14px;
+  }
+
+  .dish-card__description {
+    font-size: 0.82rem;
+  }
+
+  .dish-card__meta-row {
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+
+  .dish-card__allergen-badges {
+    gap: 5px;
+  }
+
+  .dish-card__allergen-badge {
+    font-size: 0.68rem;
+    padding: 2px 5px;
+  }
+
+  .dish-card__nutrition {
+    padding: 7px;
+  }
+
+  .nutrition-grid {
+    gap: 3px;
+  }
+
+  .nutrition-item {
+    padding: 4px;
+  }
+
+  .nutrition-item__label,
+  .nutrition-item__percentage {
+    font-size: 0.62rem;
+  }
+
+  .nutrition-item__value {
+    font-size: 0.73rem;
+  }
+}
