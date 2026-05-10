@@ -244,25 +244,36 @@
 
 .nutrition-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr)); 
   gap: 4px;
+  width: 100%;
 }
 
 .nutrition-item {
   background: #fff;
   border: 1px solid #eceff1;
   border-radius: 8px;
-  padding: 6px;
+  padding: 6px 1px; 
   text-align: center;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .nutrition-item__label {
   margin-bottom: 2px;
-  font-size: 0.64rem;
+  font-size: 0.62rem;
   font-weight: 700;
   color: #6b7280;
   text-transform: uppercase;
-  letter-spacing: 0.03em;
+  letter-spacing: -0.01em; 
+  
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis; 
+  width: 100%;
+  display: block;
 }
 
 .nutrition-item__value {
@@ -349,6 +360,25 @@
 
   .dish-card__nutrition {
     padding: 9px;
+  }
+}
+
+@media (min-width: 481px) and (max-width: 770px) {
+  .nutrition-item__label {
+    font-size: 0.58rem;
+  }
+  
+  .dish-card__body {
+    padding: 12px;
+  }
+}
+
+@media (min-width: 771px) {
+  .nutrition-item__label {
+    font-size: 0.64rem;
+  }
+  .nutrition-grid {
+    gap: 8px;
   }
 }
 
