@@ -1,3 +1,4 @@
+import api from '../api/axios';
 import React, { useState, useEffect } from 'react';
 import { UtensilsCrossed } from 'lucide-react';
 import DishCard from './DishCard';
@@ -45,21 +46,26 @@ const MenuCatalog = ({ dishes: mockDishes }) => {
     const fetchDishes = async () => {
       try {
         setLoading(true);
+
         const parsedKcal = remainingKcal === '' ? null : Number(remainingKcal);
         const appliedKcal = useFitMyDay ? parsedKcal : null;
         const { sortBy } = mapSortOptionToParams(sortOption);
 
         const data = await getAllDishes(appliedKcal, sortBy);
+
         setDishes(data);
         setAvailableAllergens(collectAllergens(data));
+        setError(null);
       } catch (err) {
+        console.error('Помилка інтеграції:', err);
         setDishes(mockDishes || []);
+        setError('Could not load fresh menu. Showing offline version.');
       } finally {
         setLoading(false);
       }
     };
     fetchDishes();
-  }, [useFitMyDay, remainingKcal, sortOption]);
+  }, [useFitMyDay, remainingKcal, sortOption, mockDishes]);
 
   // Логіка перемикання алергенів (додати/видалити з масиву)
   const toggleAllergen = (allergen) => {

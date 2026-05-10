@@ -1,5 +1,6 @@
 package com.foodly.backend.service;
 
+import io.micrometer.core.instrument.Counter;
 import com.foodly.backend.dto.DishResponseDto;
 import com.foodly.backend.entity.Dish;
 import com.foodly.backend.repository.DishRepository;
@@ -28,6 +29,10 @@ public class DishService {
 
 	private final MeterRegistry meterRegistry;
 
+	private Counter getFilterCounter() {
+		return meterRegistry.counter("foodly_filter_used_total");
+	}
+
 	/**
 	 * Retrieve all available dishes with optional sorting.
 	 * @param sortBy "proteins" or "calories" to sort by that field; null for default
@@ -46,7 +51,7 @@ public class DishService {
 			dishes = dishRepository.findAllAvailable();
 		}
 
-		logger.info("Catalog loaded: {} dishes, sorted by: {}", dishes.size(), sortBy != null ? sortBy : "default");
+		logger.info("Catalog loaded: {} dishes", dishes.size());
 		return dishes.stream().map(DishResponseDto::from).collect(Collectors.toList());
 	}
 
@@ -59,6 +64,11 @@ public class DishService {
 	 * @return List of dishes that fit within the remaining kilocalories
 	 */
 	public List<DishResponseDto> fitMyDay(BigDecimal remainingKcal, String sortBy) {
+		if (remainingKcal != null && remainingKcal.compareTo(BigDecimal.ZERO) <= 0) {
+			logger.warn("User attempted to filter with zero or negative calories: {}", remainingKcal);
+		}
+		getFilterCounter().increment();
+
 		List<Dish> dishes;
 
 		List<String> allowedSorts = List.of("proteins", "calories", "fats", "carbs");
@@ -70,19 +80,15 @@ public class DishService {
 		}
 
 		if (remainingKcal == null) {
-			logger.info("'Fit my day' inactive (null). Returning all dishes.");
 			return dishes.stream().map(DishResponseDto::from).collect(Collectors.toList());
 		}
 
 		List<DishResponseDto> filtered = dishes.stream().filter(dish -> {
-			if (dish.getCalories() == null) {
+			if (dish.getCalories() == null)
 				return false;
-			}
-
-			BigDecimal caloriesRounded = dish.getCalories().setScale(0, RoundingMode.HALF_UP);
-			BigDecimal remainingRounded = remainingKcal.setScale(0, RoundingMode.HALF_UP);
-
-			return caloriesRounded.compareTo(remainingRounded) <= 0;
+			return dish.getCalories()
+				.setScale(0, RoundingMode.HALF_UP)
+				.compareTo(remainingKcal.setScale(0, RoundingMode.HALF_UP)) <= 0;
 		}).map(DishResponseDto::from).collect(Collectors.toList());
 
 		logger.info("'Fit my day' applied: {} dishes found for limit {}", filtered.size(), remainingKcal);
