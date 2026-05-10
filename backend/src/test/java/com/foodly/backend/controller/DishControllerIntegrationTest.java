@@ -1,41 +1,39 @@
 package com.foodly.backend.controller;
 
-import com.foodly.backend.dto.DishResponseDto;
 import com.foodly.backend.entity.Dish;
 import com.foodly.backend.repository.DishRepository;
 import com.foodly.backend.service.DishService;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.ActiveProfiles;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.UUID;
 
 import static org.hamcrest.Matchers.*;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
- * Integration Test for DishController using JUnit 5 and MockMvc (Lab 3). Verifies the
- * "Fit my day" filter functionality with mocked dishes.
+ * Simplified Integration Test for DishController using Mockito (Lab 3). Tests the "Fit my
+ * day" filter functionality without requiring a real database.
  */
-@SpringBootTest
-@ActiveProfiles("test")
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@ExtendWith(MockitoExtension.class)
 class DishControllerIntegrationTest {
 
-	@Autowired
-	private WebApplicationContext webApplicationContext;
-
-	@Autowired
+	@Mock
 	private DishRepository dishRepository;
+
+	private DishService dishService;
+
+	private DishController dishController;
 
 	private MockMvc mockMvc;
 
@@ -46,15 +44,13 @@ class DishControllerIntegrationTest {
 	private Dish dish3;
 
 	@BeforeEach
-	void setUpMockMvc() {
-		// Initialize MockMvc from the web application context
-		mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
-	}
-
-	@BeforeEach
 	void setUp() {
-		// Clean up existing data without using deleteAll to avoid transaction conflicts
-		dishRepository.deleteAllInBatch();
+		// Initialize DishService with mocked repository
+		dishService = new DishService(dishRepository, new SimpleMeterRegistry());
+		dishController = new DishController(dishService);
+
+		// Set up MockMvc with the controller
+		mockMvc = MockMvcBuilders.standaloneSetup(dishController).build();
 
 		// Create test dishes with known calorie values
 		dish1 = Dish.builder()
@@ -101,39 +97,46 @@ class DishControllerIntegrationTest {
 			.carbohydrates(BigDecimal.valueOf(75))
 			.allergens(Arrays.asList("Dairy", "Nuts"))
 			.build();
-
-		// Save dishes to the repository
-		dishRepository.saveAll(Arrays.asList(dish1, dish2, dish3));
 	}
 
 	/**
-	 * Test: Verify that passing remainingKcal=500 returns only dishes under 500 kcal.
-	 * Expected: Grilled Chicken (350 kcal) and Caesar Salad (450 kcal) should be
-	 * returned. Not returned: Chocolate Cake (600 kcal) exceeds 500 kcal.
-	 */
-	@Test
-	void testFitMyDayFilterWithRemaining500Kcal() throws Exception {
-		mockMvc.perform(get("/api/dishes").param("remainingKcal", "500"))
-			.andExpect(status().isOk())
-			.andExpect(jsonPath("$", hasSize(2)))
-			.andExpect(jsonPath("$[*].name", containsInAnyOrder("Grilled Chicken", "Caesar Salad")))
-			.andExpect(jsonPath("$[*].calories", containsInAnyOrder(350, 450)));
-	}
+     * Test: Verify that passing remainingKcal=500 returns only dishes under 500 kcal.
+     * Expected: Grilled Chicken (350 kcal) and Caesar Salad (450 kcal) should be returned.
+     * Not returned: Chocolate Cake (600 kcal) exceeds 500 kcal.
+     */
+    @Test
+    void testFitMyDayFilterWithRemaining500Kcal() throws Exception {
+        // Mock repository to return all available dishes
+        when(dishRepository.findAllAvailable()).thenReturn(Arrays.asList(dish1, dish2, dish3));
+
+        mockMvc.perform(get("/api/dishes")
+                .param("remainingKcal", "500"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(2)))
+                .andExpect(jsonPath("$[*].name", containsInAnyOrder("Grilled Chicken", "Caesar Salad")))
+                .andExpect(jsonPath("$[*].calories", containsInAnyOrder(350, 450)));
+    }
 
 	/**
-	 * Test: Verify that sorting by calories works correctly within the "Fit my day"
-	 * filter. Expected: Results should be ordered by calories in ascending order.
-	 */
-	@Test
-	void testFitMyDayFilterWithCalorieSorting() throws Exception {
-		mockMvc.perform(get("/api/dishes").param("remainingKcal", "500").param("sortBy", "calories"))
-			.andExpect(status().isOk())
-			.andExpect(jsonPath("$", hasSize(2)))
-			.andExpect(jsonPath("$[0].name", is("Grilled Chicken")))
-			.andExpect(jsonPath("$[0].calories", is(350)))
-			.andExpect(jsonPath("$[1].name", is("Caesar Salad")))
-			.andExpect(jsonPath("$[1].calories", is(450)));
-	}
+     * Test: Verify that sorting by calories works correctly within the "Fit my day" filter.
+     * Expected: Results should be ordered by calories in ascending order.
+     */
+    @Test
+    void testFitMyDayFilterWithCalorieSorting() throws Exception {
+        // Mock repository for sorted results
+        when(dishRepository.findAllAvailableSorted("calories"))
+                .thenReturn(Arrays.asList(dish1, dish2, dish3));
+
+        mockMvc.perform(get("/api/dishes")
+                .param("remainingKcal", "500")
+                .param("sortBy", "calories"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(2)))
+                .andExpect(jsonPath("$[0].name", is("Grilled Chicken")))
+                .andExpect(jsonPath("$[0].calories", is(350)))
+                .andExpect(jsonPath("$[1].name", is("Caesar Salad")))
+                .andExpect(jsonPath("$[1].calories", is(450)));
+    }
 
 	/**
 	 * Test: Verify that invalid remainingKcal returns empty list. Expected: Passing
@@ -147,27 +150,33 @@ class DishControllerIntegrationTest {
 	}
 
 	/**
-	 * Test: Verify that retrieving all dishes without filter works correctly. Expected:
-	 * All three dishes should be returned.
-	 */
-	@Test
-	void testGetAllDishesWithoutFilter() throws Exception {
-		mockMvc.perform(get("/api/dishes"))
-			.andExpect(status().isOk())
-			.andExpect(jsonPath("$", hasSize(3)))
-			.andExpect(jsonPath("$[*].name", containsInAnyOrder("Grilled Chicken", "Caesar Salad", "Chocolate Cake")));
-	}
+     * Test: Verify that retrieving all dishes without filter works correctly.
+     * Expected: All three dishes should be returned.
+     */
+    @Test
+    void testGetAllDishesWithoutFilter() throws Exception {
+        // Mock repository to return all available dishes
+        when(dishRepository.findAllAvailable()).thenReturn(Arrays.asList(dish1, dish2, dish3));
+
+        mockMvc.perform(get("/api/dishes"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(3)))
+                .andExpect(jsonPath("$[*].name", containsInAnyOrder("Grilled Chicken", "Caesar Salad", "Chocolate Cake")));
+    }
 
 	/**
-	 * Test: Verify that allergen data is included in the response for warnings (Story
-	 * 2.2). Expected: Each dish should have an allergens list.
-	 */
-	@Test
-	void testDishResponseIncludesAllergens() throws Exception {
-		mockMvc.perform(get("/api/dishes"))
-			.andExpect(status().isOk())
-			.andExpect(jsonPath("$[*].allergens", notNullValue()))
-			.andExpect(jsonPath("$[0].allergens", hasSize(greaterThanOrEqualTo(1))));
-	}
+     * Test: Verify that allergen data is included in the response for warnings (Story 2.2).
+     * Expected: Each dish should have an allergens list.
+     */
+    @Test
+    void testDishResponseIncludesAllergens() throws Exception {
+        // Mock repository to return all available dishes
+        when(dishRepository.findAllAvailable()).thenReturn(Arrays.asList(dish1, dish2, dish3));
+
+        mockMvc.perform(get("/api/dishes"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[*].allergens", notNullValue()))
+                .andExpect(jsonPath("$[0].allergens", hasSize(greaterThanOrEqualTo(1))));
+    }
 
 }
