@@ -1,0 +1,99 @@
+package com.foodly.backend.service;
+
+import com.foodly.backend.dto.OrderResponseDto;
+import com.foodly.backend.entity.Dish;
+import com.foodly.backend.entity.Order;
+import com.foodly.backend.entity.OrderItem;
+import com.foodly.backend.repository.OrderRepository;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
+import org.springframework.transaction.annotation.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
+@Service
+@RequiredArgsConstructor
+public class OrderService {
+
+	private static final Logger logger = LoggerFactory.getLogger(OrderService.class);
+
+	private final OrderRepository orderRepository;
+
+	@Transactional(readOnly = true)
+	public List<OrderResponseDto> getAllOrders() {
+		List<Order> orders = orderRepository.findAll();
+		logger.info("Loaded {} orders from repository", orders.size());
+
+		return orders.stream().map(this::toDto).collect(Collectors.toList());
+	}
+
+	private OrderResponseDto toDto(Order order) {
+		BigDecimal calories = BigDecimal.ZERO;
+		BigDecimal proteins = BigDecimal.ZERO;
+		BigDecimal fats = BigDecimal.ZERO;
+		BigDecimal carbs = BigDecimal.ZERO;
+
+		List<com.foodly.backend.dto.OrderItemDto> itemSummaries = new ArrayList<>();
+
+		for (OrderItem item : order.getItems()) {
+			Dish dish = item.getDish();
+			int qty = item.getQuantity();
+			BigDecimal q = BigDecimal.valueOf(qty);
+
+			if (dish != null) {
+				BigDecimal dcal = safe(dish.getCalories());
+				BigDecimal dprot = safe(dish.getProteins());
+				BigDecimal dfat = safe(dish.getFats());
+				BigDecimal dcarb = safe(dish.getCarbohydrates());
+
+				calories = calories.add(dcal.multiply(q));
+				proteins = proteins.add(dprot.multiply(q));
+				fats = fats.add(dfat.multiply(q));
+				carbs = carbs.add(dcarb.multiply(q));
+
+				itemSummaries.add(com.foodly.backend.dto.OrderItemDto.builder()
+					.name(dish.getName())
+					.quantity(qty)
+					.imageUrl(dish.getImageUrl())
+					.priceAtPurchase(item.getPriceAtPurchase())
+					.build());
+			}
+			else {
+				itemSummaries.add(com.foodly.backend.dto.OrderItemDto.builder()
+					.name("(deleted dish)")
+					.quantity(qty)
+					.imageUrl(null)
+					.priceAtPurchase(item.getPriceAtPurchase())
+					.build());
+			}
+		}
+
+		// Normalize scale similar to DishService usage
+		calories = calories.setScale(2, RoundingMode.HALF_UP);
+		proteins = proteins.setScale(2, RoundingMode.HALF_UP);
+		fats = fats.setScale(2, RoundingMode.HALF_UP);
+		carbs = carbs.setScale(2, RoundingMode.HALF_UP);
+
+		return OrderResponseDto.builder()
+			.id(order.getId())
+			.createdAt(order.getCreatedAt())
+			.status(order.getStatus() != null ? order.getStatus().name() : null)
+			.totalPrice(order.getTotalPrice())
+			.calories(calories)
+			.proteins(proteins)
+			.fats(fats)
+			.carbohydrates(carbs)
+			.items(itemSummaries)
+			.build();
+	}
+
+	private BigDecimal safe(BigDecimal v) {
+		return v == null ? BigDecimal.ZERO : v;
+	}
+
+}

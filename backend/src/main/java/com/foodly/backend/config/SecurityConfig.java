@@ -28,6 +28,8 @@ public class SecurityConfig {
 				.permitAll()
 				.requestMatchers("/api/dishes/**")
 				.permitAll()
+				.requestMatchers("/api/orders/**")
+				.permitAll()
 				.anyRequest()
 				.authenticated());
 		return http.build();
