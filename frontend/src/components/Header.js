@@ -11,7 +11,7 @@ import './Header.css';
  * - Cart and User Profile icons on the right
  * - Responsive design
  */
-const Header = () => {
+const Header = ({ onNavigate, currentPage }) => {
   return (
     <header className="header">
       <div className="header__container">
@@ -23,10 +23,24 @@ const Header = () => {
 
         {/* Navigation Menu */}
         <nav className="header__nav">
-          <a href="#menu" className="header__nav-link">
+          <a
+            href="#menu"
+            className={`header__nav-link ${currentPage === 'menu' ? 'active' : ''}`}
+            onClick={(e) => {
+              e.preventDefault();
+              onNavigate && onNavigate('menu');
+            }}
+          >
             Menu
           </a>
-          <a href="#orders" className="header__nav-link">
+          <a
+            href="#orders"
+            className={`header__nav-link ${currentPage === 'orders' ? 'active' : ''}`}
+            onClick={(e) => {
+              e.preventDefault();
+              onNavigate && onNavigate('orders');
+            }}
+          >
             Orders
           </a>
         </nav>
