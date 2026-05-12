@@ -12,6 +12,13 @@ import {
 } from 'recharts';
 import { getNutritionLogs } from '../services/nutritionService';
 
+const MOCK_FALLBACK_DATA = [
+  { date: '2023-10-10', consumedCalories: 1800 },
+  { date: '2023-10-11', consumedCalories: 2100 },
+  { date: '2023-10-12', consumedCalories: 1900 },
+  { date: '2023-10-13', consumedCalories: 2300 },
+];
+
 const NutritionChart = () => {
   const [data, setData] = useState([]);
   const [dailyGoal, setDailyGoal] = useState(2000); // Значення за замовчуванням
@@ -22,11 +29,17 @@ const NutritionChart = () => {
       const logs = response.data.logs;
       const goal = response.data.dailyGoal;
 
+      const finalData = logs && logs.length > 0 ? logs : MOCK_FALLBACK_DATA;
+
       const sortedData = logs.sort((a, b) => new Date(a.date) - new Date(b.date));
 
       setData(sortedData);
       setDailyGoal(goal); // Встановлюємо норму, яку прислав бекенд
-    });
+    })
+    .catch((error) => {
+            console.error("Backend error, using fallback data", error);
+            setData(MOCK_FALLBACK_DATA); // Якщо сервер взагалі не відповів
+            });
   }, []);
 
   return (

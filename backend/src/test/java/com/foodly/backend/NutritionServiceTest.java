@@ -2,11 +2,17 @@ package com.foodly.backend;
 
 import com.foodly.backend.service.NutritionService;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.junit.jupiter.MockitoExtension;
+
 import static org.junit.jupiter.api.Assertions.*;
 
+@ExtendWith(MockitoExtension.class) // 1. Включаем поддержку Mockito
 class NutritionServiceTest {
 
-	private final NutritionService service = new NutritionService();
+	@InjectMocks // 2. Просим Mockito самостоятельно создать этот сервис
+	private NutritionService service;
 
 	@Test
 	void testCalculateBMRCorrectly() {
@@ -28,8 +34,9 @@ class NutritionServiceTest {
 		double loseWeight = service.calculateDci(bmr, "lose");
 		double gainWeight = service.calculateDci(bmr, "gain");
 
-		assertAll(() -> assertEquals(1700.0, loseWeight, "Дефіцит для схуднення розраховано невірно"),
-				() -> assertEquals(2300.0, gainWeight, "Профіцит для набору розраховано невірно"));
+		assertAll(
+				() -> assertEquals(1700.0, loseWeight, "Deficit for weight loss calculated incorrectly"),
+				() -> assertEquals(2300.0, gainWeight, "Surplus for weight gain calculated incorrectly")
+		);
 	}
-
 }
