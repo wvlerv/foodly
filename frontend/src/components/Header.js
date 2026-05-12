@@ -11,7 +11,7 @@ import './Header.css';
  * - Cart and User Profile icons on the right
  * - Responsive design
  */
-const Header = ({ onNavigate, currentPage }) => {
+const Header = ({ onNavigate, currentPage, cartCount }) => {
   return (
     <header className="header">
       <div className="header__container">
@@ -21,7 +21,6 @@ const Header = ({ onNavigate, currentPage }) => {
           <h1>Foodly</h1>
         </div>
 
-        {/* Navigation Menu */}
         <nav className="header__nav">
           <a
             href="#menu"
@@ -43,12 +42,24 @@ const Header = ({ onNavigate, currentPage }) => {
           >
             Orders
           </a>
+
+          <a
+            href="#analytics"
+            className={`header__nav-link ${currentPage === 'stats' ? 'active' : ''}`}
+            onClick={(e) => {
+              e.preventDefault();
+              onNavigate && onNavigate('stats'); // Перемикаємо на 'stats'
+            }}
+          >
+            Analytics
+          </a>
         </nav>
 
         {/* Right Icons */}
         <div className="header__actions">
-          <button className="header__icon-button" title="Cart">
+          <button className="header__icon-button" title="Cart" onClick={() => onNavigate('cart')}>
             <ShoppingCart size={24} />
+            {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
           </button>
           <button className="header__icon-button" title="User Profile">
             <User size={24} />

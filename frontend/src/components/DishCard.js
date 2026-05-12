@@ -2,7 +2,7 @@ import React from 'react';
 import { AlertCircle, AlertTriangle } from 'lucide-react';
 import './DishCard.css';
 
-const DishCard = ({ dish, selectedAllergen = '' }) => {
+const DishCard = ({ dish, onAddToCart, selectedAllergen = '' }) => {
   const isAvailable = dish.available ?? dish.isAvailable ?? true;
   const allergens = Array.isArray(dish.allergens) ? dish.allergens : [];
   const normalizedSelectedAllergen = selectedAllergen.trim().toLowerCase();
@@ -12,7 +12,9 @@ const DishCard = ({ dish, selectedAllergen = '' }) => {
 
   const handleAddToCart = () => {
     if (isAvailable) {
-      alert(`${dish.name} додано до кошика!`);
+      onAddToCart(dish); // Викликаємо функцію з App.js
+    } else {
+      alert(`Sorry, ${dish.name} is currently out of stock.`);
     }
   };
 
@@ -31,7 +33,7 @@ const DishCard = ({ dish, selectedAllergen = '' }) => {
         <img src={dish.imageUrl} alt={dish.name} className="dish-card__image" />
         {!isAvailable && <div className="dish-card__unavailable">Out of Stock</div>}
         {matchedAllergen && (
-          <div className="dish-card__allergen-alert" title={`Містить алерген: ${matchedAllergen}`}>
+          <div className="dish-card__allergen-alert" title={`Contains allergen: ${matchedAllergen}`}>
             <AlertCircle size={32} color="#ff4444" fill="#ff4444" />
           </div>
         )}

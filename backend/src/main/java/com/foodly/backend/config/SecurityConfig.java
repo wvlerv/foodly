@@ -23,20 +23,21 @@ public class SecurityConfig {
 	 */
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-		http.csrf(csrf -> csrf.disable())
-			.authorizeHttpRequests(auth -> auth
-					.requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
-					.requestMatchers("/api/dishes/**").permitAll()
-					.requestMatchers("/api/nutrition/**").permitAll()
-					.anyRequest().authenticated());
-			.authorizeHttpRequests(auth -> auth.requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html")
-				.permitAll()
-				.requestMatchers("/api/dishes/**")
-				.permitAll()
-				.requestMatchers("/api/orders/**")
-				.permitAll()
-				.anyRequest()
-				.authenticated());
+		http
+				.csrf(AbstractHttpConfigurer::disable) // Вимикаємо CSRF для розробки
+				.authorizeHttpRequests(auth -> auth
+						// Дозволяємо доступ до документації Swagger
+						.requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+						// Дозволяємо доступ до API страв
+						.requestMatchers("/api/dishes/**").permitAll()
+						// Дозвіл для аналітики
+						.requestMatchers("/api/nutrition/**").permitAll()
+						// Дозвіл для замовлень
+						.requestMatchers("/api/orders/**").permitAll()
+						// Усі інші запити потребують авторизації
+						.anyRequest().authenticated()
+				);
+
 		return http.build();
 	}
 

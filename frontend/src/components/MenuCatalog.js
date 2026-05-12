@@ -5,7 +5,7 @@ import DishCard from './DishCard';
 import { getAllDishes } from '../services/dishService';
 import './MenuCatalog.css';
 
-const MenuCatalog = ({ dishes: mockDishes }) => {
+const MenuCatalog = ({ dishes: mockDishes, onAddToCart }) => {
   const [dishes, setDishes] = useState([]);
   const [useFitMyDay, setUseFitMyDay] = useState(false);
   const [remainingKcal, setRemainingKcal] = useState('500');
@@ -141,7 +141,7 @@ const MenuCatalog = ({ dishes: mockDishes }) => {
         ) : visibleDishes.length > 0 ? (
           <div className="menu-catalog__grid">
             {visibleDishes.map((dish) => (
-              <DishCard key={dish.id} dish={dish} />
+              <DishCard key={dish.id} dish={dish} onAddToCart={onAddToCart} />
             ))}
           </div>
         ) : (

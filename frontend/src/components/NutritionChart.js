@@ -47,11 +47,11 @@ const NutritionChart = () => {
           letterSpacing: '-0.5px',
           marginTop: '60px',
           marginBottom: '40px',
-          fontFamily: "'Alexandria', sans-serif", // ШРИФТ З ТВОГО CSS
+          fontFamily: "'Alexandria', sans-serif",
           color: '#222',
         }}
       >
-        Аналітика споживання калорій
+        Calorie Consumption Analytics
       </h2>
 
       <div
@@ -64,7 +64,6 @@ const NutritionChart = () => {
           boxShadow: '0 15px 35px rgba(0,0,0,0.05)',
         }}
       >
-        {/* aspect={1.7} зробив графік ще трохи ширшим для зручності */}
         <ResponsiveContainer width="100%" aspect={1.7}>
           <LineChart data={data} margin={{ top: 10, right: 30, left: 10, bottom: 10 }}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#dfe6e9" />
@@ -74,7 +73,7 @@ const NutritionChart = () => {
               tick={{
                 fill: '#555',
                 fontSize: 14,
-                fontFamily: "'Plus Jakarta Sans', sans-serif", // ШРИФТ З ТВОГО CSS
+                fontFamily: "'Plus Jakarta Sans', sans-serif",
               }}
               axisLine={false}
               tickLine={false}
@@ -97,7 +96,7 @@ const NutritionChart = () => {
               y={dailyGoal}
               stroke="#ff7675"
               strokeDasharray="8 8"
-              label={{ value: `норма: ${dailyGoal}`, position: 'insideTopRight', fill: '#ff7675' }}
+              label={{ value: `goal: ${dailyGoal}`, position: 'insideTopRight', fill: '#ff7675' }}
             />
 
             <Tooltip
@@ -126,10 +125,10 @@ const NutritionChart = () => {
             />
 
             <Line
-              name="Спожиті калорії (ккал)"
+              name="Consumed Calories (kcal)"
               type="monotone"
               dataKey="consumedCalories"
-              stroke="#667eea" // Колір акценту з твого хедера
+              stroke="#667eea"
               strokeWidth={5}
               dot={{ r: 6, fill: '#667eea', strokeWidth: 3, stroke: '#fff' }}
               activeDot={{ r: 10 }}
