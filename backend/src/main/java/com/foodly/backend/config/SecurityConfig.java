@@ -29,6 +29,14 @@ public class SecurityConfig {
 					.requestMatchers("/api/dishes/**").permitAll()
 					.requestMatchers("/api/nutrition/**").permitAll()
 					.anyRequest().authenticated());
+			.authorizeHttpRequests(auth -> auth.requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html")
+				.permitAll()
+				.requestMatchers("/api/dishes/**")
+				.permitAll()
+				.requestMatchers("/api/orders/**")
+				.permitAll()
+				.anyRequest()
+				.authenticated());
 		return http.build();
 	}
 
