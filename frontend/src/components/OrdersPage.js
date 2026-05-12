@@ -62,7 +62,7 @@ const OrdersPage = () => {
   }
 
   return (
-    <div className="orders-page" style={{ padding: 20 }}>
+    <div className="orders-page">
       <h2 className="orders-page__title">Order History</h2>
       <div className="orders-page__grid">
         {orders.map((order) => (

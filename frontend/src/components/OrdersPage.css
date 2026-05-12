@@ -1,3 +1,9 @@
+.orders-page {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
 .orders-page__center {
   min-height: 60vh;
   display: flex;
@@ -19,7 +25,7 @@
 }
 
 .orders-page__title {
-  margin-top: 30px;
+  margin-top: 0;
   margin-bottom: 32px;
 }
 
