@@ -19,40 +19,44 @@ import org.springframework.security.core.Authentication;
 @Slf4j
 public class UserService {
 
-    private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
-    private final AuthenticationManager authenticationManager;
-    private final JwtUtils jwtUtils;
+	private final UserRepository userRepository;
 
-    @Transactional
-    public User registerNewUser(AuthRequest request) {
-        if (userRepository.existsByEmail(request.getEmail())) {
-            log.warn("LOG-02: Registration failed - email {} already exists", maskEmail(request.getEmail()));
-            throw new RuntimeException("Email already exists");
-        }
-        User user = User.builder()
-                .email(request.getEmail())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .role(Role.CLIENT)
-                .build();
+	private final PasswordEncoder passwordEncoder;
 
-        User savedUser = userRepository.save(user);
+	private final AuthenticationManager authenticationManager;
 
-        log.info("LOG-03: User {} successfully saved with ID: {}",
-                maskEmail(savedUser.getEmail()), savedUser.getId());
+	private final JwtUtils jwtUtils;
 
-        return savedUser;
-    }
+	@Transactional
+	public User registerNewUser(AuthRequest request) {
+		if (userRepository.existsByEmail(request.getEmail())) {
+			log.warn("LOG-02: Registration failed - email {} already exists", maskEmail(request.getEmail()));
+			throw new RuntimeException("Email already exists");
+		}
+		User user = User.builder()
+			.email(request.getEmail())
+			.password(passwordEncoder.encode(request.getPassword()))
+			.role(Role.CLIENT)
+			.build();
 
-    public String authenticateUser(AuthRequest loginRequest) {
-        UsernamePasswordAuthenticationToken authRequest =
-                new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword());
-        Authentication authentication = authenticationManager.authenticate(authRequest);
-        return jwtUtils.generateToken(authentication.getName());
-    }
+		User savedUser = userRepository.save(user);
 
-    private String maskEmail(String email) {
-        if (email == null || !email.contains("@")) return "****";
-        return email.replaceAll("(^.{2}).*(@.*$)", "$1***$2");
-    }
+		log.info("LOG-03: User {} successfully saved with ID: {}", maskEmail(savedUser.getEmail()), savedUser.getId());
+
+		return savedUser;
+	}
+
+	public String authenticateUser(AuthRequest loginRequest) {
+		UsernamePasswordAuthenticationToken authRequest = new UsernamePasswordAuthenticationToken(
+				loginRequest.getEmail(), loginRequest.getPassword());
+		Authentication authentication = authenticationManager.authenticate(authRequest);
+		return jwtUtils.generateToken(authentication.getName());
+	}
+
+	private String maskEmail(String email) {
+		if (email == null || !email.contains("@"))
+			return "****";
+		return email.replaceAll("(^.{2}).*(@.*$)", "$1***$2");
+	}
+
 }

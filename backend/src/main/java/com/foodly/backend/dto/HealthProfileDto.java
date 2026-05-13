@@ -8,11 +8,19 @@ import java.util.Set;
 
 @Data
 public class HealthProfileDto {
-    private int age;
-    private BigDecimal weight;
-    private BigDecimal height;
-    private Gender gender;
-    private BigDecimal activityMultiplier;
-    private WeightTarget target;
-    private Set<String> allergens;
+
+	private int age;
+
+	private BigDecimal weight;
+
+	private BigDecimal height;
+
+	private Gender gender;
+
+	private BigDecimal activityMultiplier;
+
+	private WeightTarget target;
+
+	private Set<String> allergens;
+
 }

@@ -1,5 +1,6 @@
 import React from 'react';
-import { Utensils, ShoppingCart, User } from 'lucide-react';
+import { Link, useLocation } from 'react-router-dom';
+import { Utensils, ShoppingCart, User, Heart as HeartIcon } from 'lucide-react';
 import './Header.css';
 
 /**
@@ -8,10 +9,12 @@ import './Header.css';
  * Features:
  * - Foodly logo on the left with Lucide icon
  * - Navigation menu (Menu, Orders)
- * - Cart and User Profile icons on the right
+ * - Favorites, Cart and User Profile icons on the right
  * - Responsive design
  */
-const Header = ({ onNavigate, currentPage }) => {
+const Header = () => {
+  const location = useLocation();
+
   return (
     <header className="header">
       <div className="header__container">
@@ -23,30 +26,29 @@ const Header = ({ onNavigate, currentPage }) => {
 
         {/* Navigation Menu */}
         <nav className="header__nav">
-          <a
-            href="#menu"
-            className={`header__nav-link ${currentPage === 'menu' ? 'active' : ''}`}
-            onClick={(e) => {
-              e.preventDefault();
-              onNavigate && onNavigate('menu');
-            }}
+          <Link
+            to="/menu"
+            className={`header__nav-link ${location.pathname === '/menu' ? 'active' : ''}`}
           >
             Menu
-          </a>
-          <a
-            href="#orders"
-            className={`header__nav-link ${currentPage === 'orders' ? 'active' : ''}`}
-            onClick={(e) => {
-              e.preventDefault();
-              onNavigate && onNavigate('orders');
-            }}
+          </Link>
+          <Link
+            to="/orders"
+            className={`header__nav-link ${location.pathname === '/orders' ? 'active' : ''}`}
           >
             Orders
-          </a>
+          </Link>
         </nav>
 
         {/* Right Icons */}
         <div className="header__actions">
+          <Link
+            to="/favorites"
+            className="header__icon-button header__icon-button--link"
+            title="Favorites"
+          >
+            <HeartIcon size={24} />
+          </Link>
           <button className="header__icon-button" title="Cart">
             <ShoppingCart size={24} />
           </button>

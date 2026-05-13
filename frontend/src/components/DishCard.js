@@ -1,8 +1,8 @@
 import React from 'react';
-import { AlertCircle, AlertTriangle } from 'lucide-react';
+import { AlertCircle, AlertTriangle, Heart } from 'lucide-react';
 import './DishCard.css';
 
-const DishCard = ({ dish, selectedAllergen = '' }) => {
+const DishCard = ({ dish, selectedAllergen = '', isFavorite = false, onToggleFavorite = null }) => {
   const isAvailable = dish.available ?? dish.isAvailable ?? true;
   const allergens = Array.isArray(dish.allergens) ? dish.allergens : [];
   const normalizedSelectedAllergen = selectedAllergen.trim().toLowerCase();
@@ -13,6 +13,13 @@ const DishCard = ({ dish, selectedAllergen = '' }) => {
   const handleAddToCart = () => {
     if (isAvailable) {
       alert(`${dish.name} додано до кошика!`);
+    }
+  };
+
+  const handleToggleFavorite = (e) => {
+    e.stopPropagation();
+    if (onToggleFavorite) {
+      onToggleFavorite(dish.id);
     }
   };
 
@@ -35,6 +42,18 @@ const DishCard = ({ dish, selectedAllergen = '' }) => {
             <AlertCircle size={32} color="#ff4444" fill="#ff4444" />
           </div>
         )}
+        {/* Favorite Heart Icon */}
+        <button
+          className={`dish-card__favorite-btn ${isFavorite ? 'active' : ''}`}
+          onClick={handleToggleFavorite}
+          title={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+        >
+          <Heart
+            size={28}
+            fill={isFavorite ? '#ff4444' : 'none'}
+            color={isFavorite ? '#ff4444' : '#666'}
+          />
+        </button>
       </div>
 
       <div className="dish-card__body">
@@ -96,7 +115,7 @@ const DishCard = ({ dish, selectedAllergen = '' }) => {
           </div>
         </div>
 
-        {/* НОВА КНОПКА */}
+        {/* Add to Order Button */}
         <button className="dish-card__add-btn" onClick={handleAddToCart} disabled={!isAvailable}>
           <svg
             xmlns="http://www.w3.org/2000/svg"

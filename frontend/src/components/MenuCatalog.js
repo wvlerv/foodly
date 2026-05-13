@@ -1,21 +1,41 @@
 import api from '../api/axios';
 import React, { useState, useEffect } from 'react';
-import { UtensilsCrossed } from 'lucide-react';
 import DishCard from './DishCard';
 import { getAllDishes } from '../services/dishService';
 import './MenuCatalog.css';
+import { CirclePlus } from 'lucide-react';
 
-const MenuCatalog = ({ dishes: mockDishes }) => {
+const MenuCatalog = ({ dishes: mockDishes, showFavoritesOnly = false }) => {
   const [dishes, setDishes] = useState([]);
   const [useFitMyDay, setUseFitMyDay] = useState(false);
   const [remainingKcal, setRemainingKcal] = useState('500');
   const [sortOption, setSortOption] = useState('none');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [favoriteIds, setFavoriteIds] = useState([]);
 
   const [selectedAllergens, setSelectedAllergens] = useState([]);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [availableAllergens, setAvailableAllergens] = useState([]);
+
+  // Load favorites from localStorage on mount
+  useEffect(() => {
+    const savedFavorites = localStorage.getItem('favoriteIds');
+    if (savedFavorites) {
+      try {
+        setFavoriteIds(JSON.parse(savedFavorites));
+      } catch (err) {
+        console.error('Error parsing favorites from localStorage:', err);
+        setFavoriteIds([]);
+      }
+    }
+  }, []);
+
+  // Save favorites to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem('favoriteIds', JSON.stringify(favoriteIds));
+  }, [favoriteIds]);
 
   const mapSortOptionToParams = (option) => {
     switch (option) {
@@ -74,60 +94,91 @@ const MenuCatalog = ({ dishes: mockDishes }) => {
     );
   };
 
-  // Фільтрація: страва зникає, якщо в ній є ХОЧА Б ОДИН із обраних алергенів
-  const visibleDishes = dishes.filter((dish) => {
+  // Toggle favorite function - adds/removes dish ID from favoriteIds
+  const toggleFavorite = (dishId) => {
+    setFavoriteIds((prev) =>
+      prev.includes(dishId) ? prev.filter((id) => id !== dishId) : [...prev, dishId]
+    );
+  };
+
+  // Filter by allergens
+  const allergenFilteredDishes = dishes.filter((dish) => {
     if (selectedAllergens.length === 0) return true;
     return !dish.allergens?.some((allergen) => selectedAllergens.includes(allergen));
   });
 
+  // Filter by search query (case-insensitive)
+  const searchFilteredDishes = allergenFilteredDishes.filter((dish) =>
+    dish.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  // Filter by favorites if showFavoritesOnly is true
+  const visibleDishes = showFavoritesOnly
+    ? searchFilteredDishes.filter((dish) => favoriteIds.includes(dish.id))
+    : searchFilteredDishes;
+
   return (
     <div className="menu-catalog">
-      <div className="menu-catalog__filters">
-        <label className="menu-catalog__switch">
-          <input
-            type="checkbox"
-            checked={useFitMyDay}
-            onChange={(e) => setUseFitMyDay(e.target.checked)}
-          />
-          <span>Fit my day</span>
-        </label>
+      {/* Only show filters if we have dishes or not in favorites-only mode */}
+      {!(showFavoritesOnly && visibleDishes.length === 0) && (
+        <>
+          <div className="menu-catalog__filters">
+            {/* Search Bar */}
+            <input
+              type="text"
+              className="menu-catalog__search"
+              placeholder="Search dishes by name..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
 
-        <input
-          type="number"
-          className="menu-catalog__input"
-          value={remainingKcal}
-          onChange={(e) => setRemainingKcal(e.target.value)}
-          disabled={!useFitMyDay}
-          placeholder="kcal limit"
-        />
+            <label className="menu-catalog__switch">
+              <input
+                type="checkbox"
+                checked={useFitMyDay}
+                onChange={(e) => setUseFitMyDay(e.target.checked)}
+              />
+              <span>Fit my day</span>
+            </label>
 
-        <select
-          className="menu-catalog__select"
-          value={sortOption}
-          onChange={(e) => setSortOption(e.target.value)}
-        >
-          <option value="none">Select All</option>
-          <option value="proteins">High Protein</option>
-          <option value="calories">Lowest Calories</option>
-          <option value="fats">Lowest Fats</option>
-          <option value="carbs">Lowest Carbs</option>
-        </select>
-      </div>
+            <input
+              type="number"
+              className="menu-catalog__input"
+              value={remainingKcal}
+              onChange={(e) => setRemainingKcal(e.target.value)}
+              disabled={!useFitMyDay}
+              placeholder="kcal limit"
+            />
 
-      {/* Секція тегів алергенів */}
-      {dishes.length > 0 && (
-        <div className="allergen-tags">
-          <span className="allergen-tags__label">Exclude allergens:</span>
-          {availableAllergens.map((allergen) => (
-            <button
-              key={allergen}
-              className={`allergen-tag ${selectedAllergens.includes(allergen) ? 'active' : ''}`}
-              onClick={() => toggleAllergen(allergen)}
+            <select
+              className="menu-catalog__select"
+              value={sortOption}
+              onChange={(e) => setSortOption(e.target.value)}
             >
-              {allergen} {selectedAllergens.includes(allergen) ? '✕' : ''}
-            </button>
-          ))}
-        </div>
+              <option value="none">Select All</option>
+              <option value="proteins">High Protein</option>
+              <option value="calories">Lowest Calories</option>
+              <option value="fats">Lowest Fats</option>
+              <option value="carbs">Lowest Carbs</option>
+            </select>
+          </div>
+
+          {/* Секція тегів алергенів */}
+          {dishes.length > 0 && (
+            <div className="allergen-tags">
+              <span className="allergen-tags__label">Exclude allergens:</span>
+              {availableAllergens.map((allergen) => (
+                <button
+                  key={allergen}
+                  className={`allergen-tag ${selectedAllergens.includes(allergen) ? 'active' : ''}`}
+                  onClick={() => toggleAllergen(allergen)}
+                >
+                  {allergen} {selectedAllergens.includes(allergen) ? '✕' : ''}
+                </button>
+              ))}
+            </div>
+          )}
+        </>
       )}
 
       <div
@@ -141,15 +192,41 @@ const MenuCatalog = ({ dishes: mockDishes }) => {
         ) : visibleDishes.length > 0 ? (
           <div className="menu-catalog__grid">
             {visibleDishes.map((dish) => (
-              <DishCard key={dish.id} dish={dish} />
+              <DishCard
+                key={dish.id}
+                dish={dish}
+                isFavorite={favoriteIds.includes(dish.id)}
+                onToggleFavorite={toggleFavorite}
+              />
             ))}
           </div>
-        ) : (
-          /* ЦЕНТРУВАННЯ НАПИСУ */
+        ) : showFavoritesOnly ? (
+          /* Empty state for favorites */
           <div className="menu-catalog__empty" style={{ margin: 'auto', textAlign: 'center' }}>
-            <UtensilsCrossed size={56} className="empty-icon" />
+            <CirclePlus size={56} style={{ color: '#999', marginBottom: '20px' }} />
+            <h2>No favorite dishes yet</h2>
+            <p>Start adding your favorite dishes by clicking the heart icon on the menu!</p>
+          </div>
+        ) : (
+          /* Empty state for search/filters */
+          <div className="menu-catalog__empty" style={{ margin: 'auto', textAlign: 'center' }}>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="56"
+              height="56"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              style={{ color: '#999', marginBottom: '20px' }}
+            >
+              <path d="M3 2v6h6M21 2v6h-6" />
+              <path d="M3 13h18M5 22h14" />
+            </svg>
             <h2>Oops! No dishes found</h2>
-            <p>Try changing the calorie limit or removing allergen filters.</p>
+            <p>Try changing the search query, calorie limit, or removing allergen filters.</p>
           </div>
         )}
       </div>

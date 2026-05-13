@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import './App.css';
 import Header from './components/Header';
 import Footer from './components/Footer';
@@ -7,17 +8,24 @@ import OrdersPage from './components/OrdersPage';
 import mockDishes from './data/mockDishes.json';
 
 function App() {
-  const [page, setPage] = useState('menu');
-
   return (
-    <div className="App">
-      <Header onNavigate={setPage} currentPage={page} />
-      <main className="App__main">
-        {page === 'menu' && <MenuCatalog dishes={mockDishes} />}
-        {page === 'orders' && <OrdersPage />}
-      </main>
-      <Footer />
-    </div>
+    <Router>
+      <div className="App">
+        <Header />
+        <main className="App__main">
+          <Routes>
+            <Route path="/menu" element={<MenuCatalog dishes={mockDishes} />} />
+            <Route
+              path="/favorites"
+              element={<MenuCatalog dishes={mockDishes} showFavoritesOnly={true} />}
+            />
+            <Route path="/orders" element={<OrdersPage />} />
+            <Route path="/" element={<Navigate to="/menu" replace />} />
+          </Routes>
+        </main>
+        <Footer />
+      </div>
+    </Router>
   );
 }
 

@@ -64,4 +64,5 @@ public class HealthProfile {
 
 	@Column(name = "daily_calorie_intake")
 	private BigDecimal dailyCalorieIntake;
+
 }
