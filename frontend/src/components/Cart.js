@@ -1,9 +1,17 @@
 import React from 'react';
 import { Trash2, Plus, Minus, ShoppingBag } from 'lucide-react';
 import './Cart.css';
+import { useNavigate } from 'react-router-dom';
 
-const Cart = ({ items, onUpdateQuantity, onRemove, onCheckout, onNavigate }) => {
+const Cart = ({ items, onUpdateQuantity, onRemove, onCheckout }) => {
+  const navigate = useNavigate(); // Використовуємо цей хук для переходів
   const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
+  // Функція, яка спрацьовує при оформленні замовлення
+  const handleCheckout = () => {
+    onCheckout(); // Викликаємо очищення кошика в App.js
+    navigate('/stats'); // Перенаправляємо на сторінку аналітики
+  };
 
   if (items.length === 0) {
     return (
@@ -11,7 +19,8 @@ const Cart = ({ items, onUpdateQuantity, onRemove, onCheckout, onNavigate }) => 
         <ShoppingBag size={64} />
         <h2>Your cart is empty</h2>
         <p>Looks like you haven't chosen anything yet. Let's fix that!</p>
-        <button className="cart-empty__btn" onClick={() => onNavigate('menu')}>
+        {/* ЗАМІНИЛИ onNavigate на navigate */}
+        <button className="cart-empty__btn" onClick={() => navigate('/menu')}>
           Go to menu
         </button>
       </div>
@@ -39,9 +48,7 @@ const Cart = ({ items, onUpdateQuantity, onRemove, onCheckout, onNavigate }) => 
                   <Plus size={18} />
                 </button>
               </div>
-              <div className="cart-item__subtotal">
-                ${(item.price * item.quantity).toFixed(2)}
-              </div>
+              <div className="cart-item__subtotal">${(item.price * item.quantity).toFixed(2)}</div>
               <button className="cart-item__remove" onClick={() => onRemove(item.id)}>
                 <Trash2 size={20} />
               </button>
@@ -59,7 +66,8 @@ const Cart = ({ items, onUpdateQuantity, onRemove, onCheckout, onNavigate }) => 
             <span>Total amount</span>
             <span>${total.toFixed(2)}</span>
           </div>
-          <button className="checkout-btn" onClick={onCheckout}>
+          {/* Викликаємо нашу нову функцію handleCheckout */}
+          <button className="checkout-btn" onClick={handleCheckout}>
             Checkout
           </button>
         </div>

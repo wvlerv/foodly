@@ -53,4 +53,5 @@ public class NutrientLog {
 		// Перетворюємо Integer у BigDecimal
 		this.consumedCalories = calories != null ? BigDecimal.valueOf(calories) : null;
 	}
+
 }

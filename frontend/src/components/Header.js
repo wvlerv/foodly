@@ -1,66 +1,58 @@
 import React from 'react';
-import { Utensils, ShoppingCart, User } from 'lucide-react';
+import { Link, useLocation } from 'react-router-dom';
+import { Utensils, ShoppingCart, User, Heart as HeartIcon, BarChart2 } from 'lucide-react';
 import './Header.css';
 
 /**
  * Header Component - Navigation and branding for Foodly
- *
- * Features:
- * - Foodly logo on the left with Lucide icon
- * - Navigation menu (Menu, Orders)
- * - Cart and User Profile icons on the right
- * - Responsive design
  */
-const Header = ({ onNavigate, currentPage, cartCount }) => {
+const Header = ({ cartCount }) => {
+  const location = useLocation();
+
+  // Функція для перевірки активного посилання
+  const getActiveClass = (path) => (location.pathname === path ? 'active' : '');
+
   return (
     <header className="header">
       <div className="header__container">
-        {/* Logo */}
-        <div className="header__logo">
+        {/* Logo - веде на головну */}
+        <Link to="/menu" className="header__logo">
           <Utensils className="logo-icon" size={28} />
           <h1>Foodly</h1>
-        </div>
+        </Link>
 
+        {/* Navigation Menu */}
         <nav className="header__nav">
-          <a
-            href="#menu"
-            className={`header__nav-link ${currentPage === 'menu' ? 'active' : ''}`}
-            onClick={(e) => {
-              e.preventDefault();
-              onNavigate && onNavigate('menu');
-            }}
-          >
+          <Link to="/menu" className={`header__nav-link ${getActiveClass('/menu')}`}>
             Menu
-          </a>
-          <a
-            href="#orders"
-            className={`header__nav-link ${currentPage === 'orders' ? 'active' : ''}`}
-            onClick={(e) => {
-              e.preventDefault();
-              onNavigate && onNavigate('orders');
-            }}
-          >
+          </Link>
+          <Link to="/orders" className={`header__nav-link ${getActiveClass('/orders')}`}>
             Orders
-          </a>
-
-          <a
-            href="#analytics"
-            className={`header__nav-link ${currentPage === 'stats' ? 'active' : ''}`}
-            onClick={(e) => {
-              e.preventDefault();
-              onNavigate && onNavigate('stats'); // Перемикаємо на 'stats'
-            }}
-          >
+          </Link>
+          <Link to="/stats" className={`header__nav-link ${getActiveClass('/stats')}`}>
+            <BarChart2 size={18} style={{ marginRight: '5px' }} />
             Analytics
-          </a>
+          </Link>
         </nav>
 
         {/* Right Icons */}
         <div className="header__actions">
-          <button className="header__icon-button" title="Cart" onClick={() => onNavigate('cart')}>
+          <Link
+            to="/favorites"
+            className={`header__icon-button ${getActiveClass('/favorites')}`}
+            title="Favorites"
+          >
+            <HeartIcon size={24} />
+          </Link>
+
+          <Link
+            to="/cart"
+            className={`header__cart-link ${location.pathname === '/cart' ? 'active' : ''}`}
+          >
             <ShoppingCart size={24} />
             {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
-          </button>
+          </Link>
+
           <button className="header__icon-button" title="User Profile">
             <User size={24} />
           </button>

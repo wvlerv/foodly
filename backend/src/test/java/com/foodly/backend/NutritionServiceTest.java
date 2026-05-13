@@ -34,9 +34,8 @@ class NutritionServiceTest {
 		double loseWeight = service.calculateDci(bmr, "lose");
 		double gainWeight = service.calculateDci(bmr, "gain");
 
-		assertAll(
-				() -> assertEquals(1700.0, loseWeight, "Deficit for weight loss calculated incorrectly"),
-				() -> assertEquals(2300.0, gainWeight, "Surplus for weight gain calculated incorrectly")
-		);
+		assertAll(() -> assertEquals(1700.0, loseWeight, "Deficit for weight loss calculated incorrectly"),
+				() -> assertEquals(2300.0, gainWeight, "Surplus for weight gain calculated incorrectly"));
 	}
+
 }

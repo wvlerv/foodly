@@ -24,22 +24,23 @@ const NutritionChart = () => {
   const [dailyGoal, setDailyGoal] = useState(2000); // Значення за замовчуванням
 
   useEffect(() => {
-    getNutritionLogs().then((response) => {
-      // Тепер дані лежать у response.data.logs
-      const logs = response.data.logs;
-      const goal = response.data.dailyGoal;
+    getNutritionLogs()
+      .then((response) => {
+        // Тепер дані лежать у response.data.logs
+        const logs = response.data.logs;
+        const goal = response.data.dailyGoal;
 
-      const finalData = logs && logs.length > 0 ? logs : MOCK_FALLBACK_DATA;
+        const finalData = logs && logs.length > 0 ? logs : MOCK_FALLBACK_DATA;
 
-      const sortedData = logs.sort((a, b) => new Date(a.date) - new Date(b.date));
+        const sortedData = logs.sort((a, b) => new Date(a.date) - new Date(b.date));
 
-      setData(sortedData);
-      setDailyGoal(goal); // Встановлюємо норму, яку прислав бекенд
-    })
-    .catch((error) => {
-            console.error("Backend error, using fallback data", error);
-            setData(MOCK_FALLBACK_DATA); // Якщо сервер взагалі не відповів
-            });
+        setData(sortedData);
+        setDailyGoal(goal); // Встановлюємо норму, яку прислав бекенд
+      })
+      .catch((error) => {
+        console.error('Backend error, using fallback data', error);
+        setData(MOCK_FALLBACK_DATA); // Якщо сервер взагалі не відповів
+      });
   }, []);
 
   return (

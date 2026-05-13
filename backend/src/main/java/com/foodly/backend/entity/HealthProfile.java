@@ -1,5 +1,6 @@
 package com.foodly.backend.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
@@ -39,6 +40,7 @@ public class HealthProfile {
 	@OneToOne
 	@MapsId
 	@JoinColumn(name = "user_id")
+	@JsonIgnore
 	private User user;
 
 	private int age;
@@ -59,5 +61,8 @@ public class HealthProfile {
 	@ElementCollection
 	@CollectionTable(name = "user_allergens", joinColumns = @JoinColumn(name = "user_id"))
 	private Set<String> allergens;
+
+	@Column(name = "daily_calorie_intake")
+	private BigDecimal dailyCalorieIntake;
 
 }

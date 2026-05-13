@@ -163,7 +163,9 @@
   font-weight: 600;
   cursor: pointer;
   margin-top: 20px;
-  transition: background 0.3s, transform 0.1s;
+  transition:
+    background 0.3s,
+    transform 0.1s;
 }
 
 .checkout-btn:hover {
