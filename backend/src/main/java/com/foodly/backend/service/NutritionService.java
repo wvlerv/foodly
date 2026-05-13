@@ -1,7 +1,10 @@
 package com.foodly.backend.service;
 
 import org.springframework.stereotype.Service;
-
+import java.math.BigDecimal;
+import com.foodly.backend.entity.HealthProfile;
+import com.foodly.backend.entity.Gender;
+import com.foodly.backend.entity.WeightTarget;
 /**
  * Service for calculating nutritional metrics like BMR (Basal Metabolic Rate) and DCI
  * (Daily Caloric Intake).
@@ -44,6 +47,32 @@ public class NutritionService {
 				return bmr;
 			default:
 				throw new IllegalArgumentException("Unknown target");
+		}
+	}
+
+	public BigDecimal calculateFullDci(HealthProfile profile) {
+		BigDecimal bmr = calculateBmrFromProfile(profile);
+		BigDecimal tdee = bmr.multiply(profile.getActivityMultiplier());
+
+		if (profile.getTarget() == WeightTarget.LOSE) {
+			return tdee.multiply(new BigDecimal("0.85")); // -15%
+		} else if (profile.getTarget() == WeightTarget.GAIN) {
+			return tdee.multiply(new BigDecimal("1.15")); // +15%
+		}
+		return tdee;
+	}
+
+	private BigDecimal calculateBmrFromProfile(HealthProfile profile) {
+		BigDecimal weightPart = new BigDecimal("10").multiply(profile.getWeight());
+		BigDecimal heightPart = new BigDecimal("6.25").multiply(profile.getHeight());
+		BigDecimal agePart = new BigDecimal("5").multiply(new BigDecimal(profile.getAge()));
+
+		BigDecimal bmr = weightPart.add(heightPart).subtract(agePart);
+
+		if (profile.getGender() == Gender.MALE) {
+			return bmr.add(new BigDecimal("5"));
+		} else {
+			return bmr.subtract(new BigDecimal("161"));
 		}
 	}
 
