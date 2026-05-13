@@ -15,43 +15,45 @@ import java.math.BigDecimal;
 @RequiredArgsConstructor
 public class ProfileService {
 
-    private final HealthProfileRepository profileRepository;
-    private final UserRepository userRepository;
-    private final NutritionService nutritionService;
+	private final HealthProfileRepository profileRepository;
 
-    @Transactional
-    public HealthProfile updateProfile(HealthProfileDto dto, String email) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+	private final UserRepository userRepository;
 
-        HealthProfile profile = user.getHealthProfile();
+	private final NutritionService nutritionService;
 
-        if (profile == null) {
-            profile = new HealthProfile();
-            profile.setId(user.getId());
-            profile.setUser(user);
-            user.setHealthProfile(profile);
-        }
+	@Transactional
+	public HealthProfile updateProfile(HealthProfileDto dto, String email) {
+		User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
 
-        profile.setAge(dto.getAge());
-        profile.setWeight(dto.getWeight());
-        profile.setHeight(dto.getHeight());
-        profile.setGender(dto.getGender());
-        profile.setActivityMultiplier(dto.getActivityMultiplier());
-        profile.setTarget(dto.getTarget());
-        profile.setAllergens(dto.getAllergens());
-        BigDecimal dci = nutritionService.calculateFullDci(profile);
-        profile.setDailyCalorieIntake(dci);
+		HealthProfile profile = user.getHealthProfile();
 
-        userRepository.save(user);
+		if (profile == null) {
+			profile = new HealthProfile();
+			profile.setId(user.getId());
+			profile.setUser(user);
+			user.setHealthProfile(profile);
+		}
 
-        return user.getHealthProfile();
-    }
+		profile.setAge(dto.getAge());
+		profile.setWeight(dto.getWeight());
+		profile.setHeight(dto.getHeight());
+		profile.setGender(dto.getGender());
+		profile.setActivityMultiplier(dto.getActivityMultiplier());
+		profile.setTarget(dto.getTarget());
+		profile.setAllergens(dto.getAllergens());
+		BigDecimal dci = nutritionService.calculateFullDci(profile);
+		profile.setDailyCalorieIntake(dci);
 
-    @Transactional(readOnly = true)
-    public HealthProfile getProfileByEmail(String email) {
-        return userRepository.findByEmail(email)
-                .map(User::getHealthProfile)
-                .orElseThrow(() -> new RuntimeException("Profile not found for user: " + email));
-    }
+		userRepository.save(user);
+
+		return user.getHealthProfile();
+	}
+
+	@Transactional(readOnly = true)
+	public HealthProfile getProfileByEmail(String email) {
+		return userRepository.findByEmail(email)
+			.map(User::getHealthProfile)
+			.orElseThrow(() -> new RuntimeException("Profile not found for user: " + email));
+	}
+
 }

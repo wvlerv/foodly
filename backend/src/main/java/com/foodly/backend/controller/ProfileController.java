@@ -18,22 +18,20 @@ import java.util.Map;
 @Slf4j
 public class ProfileController {
 
-    private final ProfileService profileService;
+	private final ProfileService profileService;
 
-    @PostMapping("/update")
-    public ResponseEntity<?> updateProfile(@RequestBody HealthProfileDto dto, Authentication authentication) {
-        HealthProfile updated = profileService.updateProfile(dto, authentication.getName());
+	@PostMapping("/update")
+	public ResponseEntity<?> updateProfile(@RequestBody HealthProfileDto dto, Authentication authentication) {
+		HealthProfile updated = profileService.updateProfile(dto, authentication.getName());
 
-        return ResponseEntity.ok(Map.of(
-                "message", "Profile updated successfully",
-                "dailyCalories", updated.getDailyCalorieIntake().setScale(0, BigDecimal.ROUND_HALF_UP),
-                "userId", updated.getId()
-        ));
-    }
+		return ResponseEntity.ok(Map.of("message", "Profile updated successfully", "dailyCalories",
+				updated.getDailyCalorieIntake().setScale(0, BigDecimal.ROUND_HALF_UP), "userId", updated.getId()));
+	}
 
-    @GetMapping("/me")
-    public ResponseEntity<?> getMyProfile(Authentication authentication) {
-        log.info("Fetching profile for: {}", authentication.getName());
-        return ResponseEntity.ok(profileService.getProfileByEmail(authentication.getName()));
-    }
+	@GetMapping("/me")
+	public ResponseEntity<?> getMyProfile(Authentication authentication) {
+		log.info("Fetching profile for: {}", authentication.getName());
+		return ResponseEntity.ok(profileService.getProfileByEmail(authentication.getName()));
+	}
+
 }

@@ -86,6 +86,23 @@
   background-color: #f5f5f5;
 }
 
+/* Ensure all header icons (svg from lucide-react) use the same base color */
+.header__icon-button svg,
+.header__icon-button svg * {
+  color: #222;
+  stroke: currentColor;
+  fill: none;
+}
+
+/* Keep link-styled icon appearance consistent */
+.header__icon-button--link {
+  color: #222;
+}
+
+.header__icon-button--link:hover {
+  background-color: #f5f5f5;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .header__container {
@@ -129,4 +146,17 @@
     font-size: 16px;
     padding: 6px 8px;
   }
+}
+
+.header__icon-button--link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.header__icon-button--link svg {
+  color: #222;
+}
+
+.header__icon-button--link:hover {
+  background-color: #f5f5f5;
 }
