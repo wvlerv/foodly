@@ -216,118 +216,70 @@
 }
 
 .dish-card__nutrition {
-  margin-top: 8px; /* зменшено відстань від ціни до КБЖУ */
-  padding-top: 8px;
-  border-top: 1px solid #eee;
-  background: #fafafa;
-  border-radius: 10px;
-  padding: 10px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #e5e7eb;
 }
 
-/* Покращене відображення КБЖУ: дозвіл переносів і обмеження ширини лейблів */
-.nutrition-row {
+.nutrition-summary {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 6px;
-  font-size: 0.75rem;
-  color: #4b5563;
-}
-
-.nutrition-label {
-  font-weight: 600;
-  max-width: 66%;
-  white-space: normal;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  word-break: break-word;
-  font-size: 0.72rem; /* трохи менший шрифт для лейблів */
-}
-
-.nutrition-value {
-  font-weight: 600;
-  flex: 0 0 auto; /* фіксуємо розмір значення, щоб не обтікав */
-  font-size: 0.75rem;
-  color: #111827;
-}
-
-.nutrition-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 6px;
-  font-size: 0.75rem;
-  color: #4b5563;
-}
-
-.nutrition-label,
-.nutrition-value {
-  font-weight: 600;
-}
-
-.nutrition-value {
-  color: #111827;
-}
-
-.nutrition-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: baseline;
   gap: 4px;
-  width: 100%;
+  margin-bottom: 12px;
+  font-size: 0.9rem;
+}
+
+.nutrition-summary strong {
+  font-size: 1.3rem;
+  color: #111827;
+}
+
+.nutrition-summary small {
+  color: #666;
+  font-size: 0.8rem;
+}
+
+.nutrition-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .nutrition-item {
-  background: #fff;
-  border: 1px solid #eceff1;
-  border-radius: 8px;
-  padding: 6px 1px;
-  text-align: center;
-  min-width: 0;
   display: flex;
   flex-direction: column;
+  gap: 4px;
+}
+
+.nutrition-item__info {
+  display: flex;
+  justify-content: space-between;
   align-items: center;
+  font-size: 0.85rem;
 }
 
-.nutrition-item__label {
-  margin-bottom: 2px;
-  font-size: 0.62rem;
-  font-weight: 700;
-  color: #6b7280;
-  text-transform: uppercase;
-  letter-spacing: -0.01em;
-
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  width: 100%;
-  display: block;
+.nutrition-item__info span:first-child {
+  font-weight: 600;
+  color: #555;
 }
 
-.nutrition-item__value {
-  margin-bottom: 2px;
-  font-size: 0.76rem;
+.nutrition-item__info span:last-child {
   font-weight: 700;
   color: #111827;
-}
-
-.nutrition-item__percentage {
-  margin-bottom: 3px;
-  font-size: 0.64rem;
-  color: #9ca3af;
 }
 
 .nutrition-item__bar {
   width: 100%;
-  height: 3px;
+  height: 6px;
   background: #e5e7eb;
-  border-radius: 999px;
+  border-radius: 3px;
   overflow: hidden;
 }
 
 .nutrition-item__bar-fill {
   height: 100%;
-  border-radius: 999px;
+  border-radius: 3px;
+  transition: width 0.3s ease;
 }
 
 .protein-bar {

@@ -17,22 +17,41 @@ const MenuCatalog = ({ dishes: mockDishes, onAddToCart, showFavoritesOnly = fals
   const [error, setError] = useState(null);
   const [availableAllergens, setAvailableAllergens] = useState([]);
 
-  // Завантаження обраного з localStorage
+  // Helper function to get JWT token from localStorage
+  const getAuthHeaders = () => {
+    const token = localStorage.getItem('token');
+    return {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    };
+  };
+
+  // Fetch user's favorite dishes from API on component mount
   useEffect(() => {
-    const savedFavorites = localStorage.getItem('favoriteIds');
-    if (savedFavorites) {
+    const fetchFavorites = async () => {
       try {
-        setFavoriteIds(JSON.parse(savedFavorites));
+        const response = await fetch('/api/profile/favorites', {
+          method: 'GET',
+          headers: getAuthHeaders(),
+        });
+
+        if (response.ok) {
+          const favoriteDishes = await response.json();
+          // Extract IDs from the returned dish objects
+          const ids = favoriteDishes.map((dish) => dish.id);
+          setFavoriteIds(ids);
+        } else if (response.status === 401) {
+          // User not authenticated, initialize with empty array
+          setFavoriteIds([]);
+        }
       } catch (err) {
+        console.error('Error fetching favorites:', err);
         setFavoriteIds([]);
       }
-    }
-  }, []);
+    };
 
-  // Збереження обраного
-  useEffect(() => {
-    localStorage.setItem('favoriteIds', JSON.stringify(favoriteIds));
-  }, [favoriteIds]);
+    fetchFavorites();
+  }, []);
 
   const mapSortOptionToParams = (option) => {
     const mapping = {
@@ -83,10 +102,51 @@ const MenuCatalog = ({ dishes: mockDishes, onAddToCart, showFavoritesOnly = fals
     );
   };
 
-  const toggleFavorite = (dishId) => {
-    setFavoriteIds((prev) =>
-      prev.includes(dishId) ? prev.filter((id) => id !== dishId) : [...prev, dishId]
-    );
+  /**
+   * Toggle favorite status for a dish using the API.
+   * If the dish is already a favorite, delete it.
+   * If not, add it to favorites.
+   */
+  const toggleFavorite = async (dishId) => {
+    const isFavorited = favoriteIds.includes(dishId);
+    const method = isFavorited ? 'DELETE' : 'POST';
+    const url = `/api/profile/favorites/${dishId}`;
+
+    try {
+      console.log(
+        `[Favorites] ${method} request to ${url}, Token: ${localStorage.getItem('token') ? 'present' : 'missing'}`
+      );
+
+      const response = await fetch(url, {
+        method,
+        headers: getAuthHeaders(),
+      });
+
+      console.log(`[Favorites] Response status: ${response.status}`);
+
+      if (response.ok) {
+        // Update state only if fetch was successful
+        if (isFavorited) {
+          // Remove from favorites
+          setFavoriteIds((prev) => prev.filter((id) => id !== dishId));
+          console.log('[Favorites] Removed from favorites');
+        } else {
+          // Add to favorites
+          setFavoriteIds((prev) => [...prev, dishId]);
+          console.log('[Favorites] Added to favorites');
+        }
+      } else if (response.status === 401) {
+        console.error('[Favorites] Not authenticated (401)');
+        alert('Please log in to add items to favorites');
+      } else {
+        const errorText = await response.text();
+        console.error(`[Favorites] Error (${response.status}): ${response.statusText}`, errorText);
+        alert(`Error: ${response.status} - ${response.statusText}`);
+      }
+    } catch (err) {
+      console.error('[Favorites] Network error:', err);
+      alert(`Network error: ${err.message}`);
+    }
   };
 
   // Фільтрація (Алергени -> Пошук -> Обране)

@@ -67,6 +67,14 @@ function App() {
               element={<MenuCatalog dishes={mockDishes} onAddToCart={addToCart} />}
             />
 
+            {/* Улюблені страви */}
+            <Route
+              path="/favorites"
+              element={
+                <MenuCatalog dishes={mockDishes} onAddToCart={addToCart} showFavoritesOnly={true} />
+              }
+            />
+
             {/* Сторінка аналітики (Твій графік) */}
             <Route path="/stats" element={<NutritionChart />} />
 

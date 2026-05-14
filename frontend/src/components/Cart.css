@@ -183,24 +183,55 @@
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: 60px 20px;
-  color: #b2bec3;
+  min-height: calc(100vh - 260px);
+  width: 100%;
+  margin: 0 auto;
+  padding: 24px 20px;
+  color: #666;
+}
+
+.cart-empty__icon {
+  display: block;
+  margin: 0 auto 28px auto;
+  color: #999;
 }
 
 .cart-empty h2 {
-  color: #2d3436;
-  margin: 20px 0 10px;
+  margin: 0 0 12px 0;
+  font-size: 1.6rem;
+  color: #333;
+}
+
+.cart-empty p {
+  margin: 10px 0 0 0;
+  font-size: 18px;
+  color: #666;
 }
 
 .cart-empty__btn {
   margin-top: 20px;
-  background: #0984e3;
+  background: #111827;
   color: white;
   border: none;
-  padding: 12px 30px;
-  border-radius: 25px;
+  padding: 12px 22px;
+  border-radius: 10px;
   cursor: pointer;
-  font-weight: 600;
+  font-weight: 700;
+  font-size: 0.95rem;
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.cart-empty__btn:hover {
+  background: #3b82f6;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(59, 130, 246, 0.22);
+}
+
+.cart-empty__btn:active {
+  transform: translateY(0);
 }
 
 /* Адаптивність для мобільних пристроїв */

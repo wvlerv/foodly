@@ -13,10 +13,11 @@ import java.util.List;
 @CrossOrigin(origins = "*")
 public class NutritionController {
 
-    private final NutrientLogRepository repository;
+	private final NutrientLogRepository repository;
 
-    @GetMapping("/logs")
-    public List<NutrientLog> getAllLogs() {
-        return repository.findAll();
-    }
+	@GetMapping("/logs")
+	public List<NutrientLog> getAllLogs() {
+		return repository.findAll();
+	}
+
 }

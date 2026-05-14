@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Utensils, ShoppingCart, User, Heart as HeartIcon, BarChart2 } from 'lucide-react';
+import { Utensils, ShoppingCart, User, Heart as HeartIcon } from 'lucide-react';
 import './Header.css';
 
 /**
@@ -30,7 +30,6 @@ const Header = ({ cartCount }) => {
             Orders
           </Link>
           <Link to="/stats" className={`header__nav-link ${getActiveClass('/stats')}`}>
-            <BarChart2 size={18} style={{ marginRight: '5px' }} />
             Analytics
           </Link>
         </nav>

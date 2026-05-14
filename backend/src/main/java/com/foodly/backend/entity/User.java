@@ -2,6 +2,8 @@ package com.foodly.backend.entity;
 
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -36,5 +38,11 @@ public class User {
 
 	@OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private HealthProfile healthProfile;
+
+	@ManyToMany(fetch = FetchType.LAZY)
+	@JoinTable(name = "user_favorite_dishes", joinColumns = @JoinColumn(name = "user_id"),
+			inverseJoinColumns = @JoinColumn(name = "dish_id"))
+	@Builder.Default
+	private List<Dish> favoriteDishes = new ArrayList<>();
 
 }
