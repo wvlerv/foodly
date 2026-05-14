@@ -22,6 +22,16 @@ const OrderCard = ({ order }) => {
   const fats = order.fats ? Math.round(order.fats) : 0;
   const carbs = order.carbohydrates ? Math.round(order.carbohydrates) : 0;
 
+  // Розрахунок калорійності макросів (4-9-4 правило)
+  const totalMacroCalories = proteins * 4 + carbs * 4 + fats * 9;
+
+  const getPercentage = (val, multiplier) =>
+    totalMacroCalories > 0 ? Math.round(((val * multiplier) / totalMacroCalories) * 100) : 0;
+
+  const proteinPercentage = getPercentage(proteins, 4);
+  const carbsPercentage = getPercentage(carbs, 4);
+  const fatsPercentage = getPercentage(fats, 9);
+
   return (
     <div className="dish-card order-card">
       <div className="dish-card__body">
@@ -48,24 +58,29 @@ const OrderCard = ({ order }) => {
         </div>
 
         <div className="dish-card__nutrition">
-          <div className="nutrition-row">
-            <span className="nutrition-label">Total Calories</span>
-            <span className="nutrition-value">{calories} kcal</span>
+          <div className="nutrition-summary">
+            <strong>{calories}</strong> <small>kcal</small>
           </div>
 
-          <div className="nutrition-grid">
-            <div className="nutrition-item">
-              <div className="nutrition-item__label">Proteins</div>
-              <div className="nutrition-item__value">{proteins}g</div>
-            </div>
-            <div className="nutrition-item">
-              <div className="nutrition-item__label">Fats</div>
-              <div className="nutrition-item__value">{fats}g</div>
-            </div>
-            <div className="nutrition-item">
-              <div className="nutrition-item__label">Carbs</div>
-              <div className="nutrition-item__value">{carbs}g</div>
-            </div>
+          <div className="nutrition-bars">
+            {[
+              { label: 'Prot.', val: proteins, pct: proteinPercentage, class: 'protein' },
+              { label: 'Fats', val: fats, pct: fatsPercentage, class: 'fat' },
+              { label: 'Carbs', val: carbs, pct: carbsPercentage, class: 'carbs' },
+            ].map((item) => (
+              <div className="nutrition-item" key={item.label}>
+                <div className="nutrition-item__info">
+                  <span>{item.label}</span>
+                  <span>{item.val}g</span>
+                </div>
+                <div className="nutrition-item__bar">
+                  <div
+                    className={`nutrition-item__bar-fill ${item.class}-bar`}
+                    style={{ width: `${item.pct}%` }}
+                  ></div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 

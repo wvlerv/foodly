@@ -164,6 +164,13 @@
   color: #9ca3af;
 }
 
+.menu-catalog__controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
 .filter-button {
   padding: 10px 20px;
   border: 2px solid #e0e0e0;

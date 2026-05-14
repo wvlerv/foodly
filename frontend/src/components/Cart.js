@@ -16,10 +16,9 @@ const Cart = ({ items, onUpdateQuantity, onRemove, onCheckout }) => {
   if (items.length === 0) {
     return (
       <div className="cart-empty">
-        <ShoppingBag size={64} />
+        <ShoppingBag size={56} className="cart-empty__icon" />
         <h2>Your cart is empty</h2>
         <p>Looks like you haven't chosen anything yet. Let's fix that!</p>
-        {/* ЗАМІНИЛИ onNavigate на navigate */}
         <button className="cart-empty__btn" onClick={() => navigate('/menu')}>
           Go to menu
         </button>

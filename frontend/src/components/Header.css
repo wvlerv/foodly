@@ -33,6 +33,7 @@
 .logo-icon {
   font-size: 28px;
   line-height: 1;
+  color: #222;
 }
 
 .header__logo h1 {
@@ -96,10 +97,10 @@
   position: relative;
 }
 
-.header__cart-link.active {
-  color: #6200ee !important;
+.header__cart-link:hover {
+  background-color: #f5f5f5;
+  border-radius: 6px;
 }
-
 
 /* Ensure all header icons (svg from lucide-react) use the same base color */
 .header__icon-button svg,
