@@ -8,8 +8,11 @@ import OrdersPage from './components/OrdersPage';
 import mockDishes from './data/mockDishes.json';
 import NutritionChart from './components/NutritionChart';
 import Cart from './components/Cart';
+import authService from './services/authService';
+import AuthPage from './components/AuthPage';
 
 function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('token'));
   const [cartItems, setCartItems] = useState([]);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
@@ -48,6 +51,15 @@ function App() {
     triggerToast(`${dish.name} added to cart!`);
   };
 
+  const handleLogout = () => {
+    authService.logout();
+    setIsAuthenticated(false);
+  };
+
+  const handleLoginSuccess = () => {
+    setIsAuthenticated(true);
+  };
+
   // Рахуємо кількість товарів для хедера
   const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
@@ -55,7 +67,7 @@ function App() {
     <Router>
       <div className="App">
         {/* Передаємо cartCount у хедер, щоб він відображав цифру */}
-        <Header cartCount={cartCount} />
+        <Header cartCount={cartCount} isAuthenticated={isAuthenticated} onLogout={handleLogout} />
 
         {showToast && <div className="toast-notification">{toastMessage}</div>}
 
@@ -66,6 +78,8 @@ function App() {
               path="/menu"
               element={<MenuCatalog dishes={mockDishes} onAddToCart={addToCart} />}
             />
+
+            <Route path="/login" element={<AuthPage onLoginSuccess={handleLoginSuccess} />} />
 
             {/* Улюблені страви */}
             <Route

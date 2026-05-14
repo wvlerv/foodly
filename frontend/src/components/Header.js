@@ -2,14 +2,13 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Utensils, ShoppingCart, User, Heart as HeartIcon } from 'lucide-react';
 import './Header.css';
+import { LogOut, LogIn } from 'lucide-react';
 
 /**
  * Header Component - Navigation and branding for Foodly
  */
-const Header = ({ cartCount }) => {
+const Header = ({ cartCount, isAuthenticated, onLogout })  => {
   const location = useLocation();
-
-  // Функція для перевірки активного посилання
   const getActiveClass = (path) => (location.pathname === path ? 'active' : '');
 
   return (
@@ -55,6 +54,21 @@ const Header = ({ cartCount }) => {
           <button className="header__icon-button" title="User Profile">
             <User size={24} />
           </button>
+          {isAuthenticated ? (
+            <button className="header__icon-button logout-btn" onClick={onLogout} title="Logout">
+              <LogOut size={24} />
+              <span className="auth-text">Log Out</span>
+            </button>
+          ) : (
+            <Link
+              to="/login"
+              className={`header__icon-button login-link ${getActiveClass('/login')}`}
+              title="Login"
+            >
+              <LogIn size={24} />
+              <span className="auth-text">Log In</span>
+            </Link>
+          )}
         </div>
       </div>
     </header>
