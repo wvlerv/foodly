@@ -86,6 +86,21 @@
   background-color: #f5f5f5;
 }
 
+.header__cart-link,
+.header__cart-link:visited {
+  color: #222;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.header__cart-link.active {
+  color: #6200ee !important;
+}
+
+
 /* Ensure all header icons (svg from lucide-react) use the same base color */
 .header__icon-button svg,
 .header__icon-button svg * {

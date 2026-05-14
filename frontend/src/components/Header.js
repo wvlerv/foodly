@@ -1,42 +1,37 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Utensils, ShoppingCart, User, Heart as HeartIcon } from 'lucide-react';
+import { Utensils, ShoppingCart, User, Heart as HeartIcon, BarChart2 } from 'lucide-react';
 import './Header.css';
 
 /**
  * Header Component - Navigation and branding for Foodly
- *
- * Features:
- * - Foodly logo on the left with Lucide icon
- * - Navigation menu (Menu, Orders)
- * - Favorites, Cart and User Profile icons on the right
- * - Responsive design
  */
-const Header = () => {
+const Header = ({ cartCount }) => {
   const location = useLocation();
+
+  // Функція для перевірки активного посилання
+  const getActiveClass = (path) => (location.pathname === path ? 'active' : '');
 
   return (
     <header className="header">
       <div className="header__container">
-        {/* Logo */}
-        <div className="header__logo">
+        {/* Logo - веде на головну */}
+        <Link to="/menu" className="header__logo">
           <Utensils className="logo-icon" size={28} />
           <h1>Foodly</h1>
-        </div>
+        </Link>
 
         {/* Navigation Menu */}
         <nav className="header__nav">
-          <Link
-            to="/menu"
-            className={`header__nav-link ${location.pathname === '/menu' ? 'active' : ''}`}
-          >
+          <Link to="/menu" className={`header__nav-link ${getActiveClass('/menu')}`}>
             Menu
           </Link>
-          <Link
-            to="/orders"
-            className={`header__nav-link ${location.pathname === '/orders' ? 'active' : ''}`}
-          >
+          <Link to="/orders" className={`header__nav-link ${getActiveClass('/orders')}`}>
             Orders
+          </Link>
+          <Link to="/stats" className={`header__nav-link ${getActiveClass('/stats')}`}>
+            <BarChart2 size={18} style={{ marginRight: '5px' }} />
+            Analytics
           </Link>
         </nav>
 
@@ -44,14 +39,20 @@ const Header = () => {
         <div className="header__actions">
           <Link
             to="/favorites"
-            className="header__icon-button header__icon-button--link"
+            className={`header__icon-button ${getActiveClass('/favorites')}`}
             title="Favorites"
           >
             <HeartIcon size={24} />
           </Link>
-          <button className="header__icon-button" title="Cart">
+
+          <Link
+            to="/cart"
+            className={`header__cart-link ${location.pathname === '/cart' ? 'active' : ''}`}
+          >
             <ShoppingCart size={24} />
-          </button>
+            {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
+          </Link>
+
           <button className="header__icon-button" title="User Profile">
             <User size={24} />
           </button>

@@ -8,6 +8,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -23,17 +24,33 @@ public class SecurityConfig {
 
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-		http.csrf(csrf -> csrf.disable())
+		http
+			// 1. Вимикаємо CSRF
+			.csrf(AbstractHttpConfigurer::disable)
+
+			// 2. Робимо сесії STATELESS
 			.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-			.authorizeHttpRequests(auth -> auth.requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html")
+
+			// 3. Налаштовуємо права доступу
+			.authorizeHttpRequests(auth -> auth
+				// Дозволяємо Swagger
+				.requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html")
 				.permitAll()
+				// Дозволяємо авторизацію та реєстрацію
 				.requestMatchers("/api/auth/**")
 				.permitAll()
+				// Дозволяємо публічні API (страви, аналітика, замовлення)
 				.requestMatchers("/api/dishes/**")
 				.permitAll()
+				.requestMatchers("/api/nutrition/**")
+				.permitAll()
+				.requestMatchers("/api/orders/**")
+				.permitAll()
+				// Усе інше потребує логіна
 				.anyRequest()
-				.authenticated());
-		http.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+				.authenticated())
+
+			.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
 		return http.build();
 	}

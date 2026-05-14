@@ -47,4 +47,11 @@ public class NutrientLog {
 
 	private BigDecimal consumedCarbs;
 
+	// Спеціальний конструктор для DataLoader
+	public NutrientLog(LocalDate date, Integer calories) {
+		this.date = date;
+		// Перетворюємо Integer у BigDecimal
+		this.consumedCalories = calories != null ? BigDecimal.valueOf(calories) : null;
+	}
+
 }
