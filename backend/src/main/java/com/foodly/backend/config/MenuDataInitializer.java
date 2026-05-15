@@ -25,14 +25,14 @@ public class MenuDataInitializer implements CommandLineRunner {
 
 	@Override
 	public void run(String... args) throws Exception {
-		// if (dishRepository.count() == 0) {
+		if (dishRepository.count() == 0) {
 			log.info("Initializing menu database with default healthy dishes...");
 			initializeMenuData();
 			log.info("Menu initialization completed successfully!");
-		// }
-		// else {
-		// 	log.info("Dishes table already contains data. Skipping initialization.");
-		// }
+		}
+		else {
+			log.info("Dishes table already contains data. Skipping initialization.");
+		}
 	}
 
 	private void initializeMenuData() {
@@ -107,7 +107,7 @@ public class MenuDataInitializer implements CommandLineRunner {
 					"Perfectly grilled lean beef sirloin steak with roasted fresh asparagus, garlic mashed cauliflower, and a rich red wine reduction sauce.")
 			.price(new BigDecimal("18.99"))
 			.weight(new BigDecimal("450"))
-			.imageUrl("https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&h=500&fit=crop")
+			.imageUrl("https://images.unsplash.com/photo-1600891964092-4316c288032e?w=500&h=500&fit=crop")
 			.isAvailable(true)
 			.calories(new BigDecimal("580"))
 			.proteins(new BigDecimal("52"))
