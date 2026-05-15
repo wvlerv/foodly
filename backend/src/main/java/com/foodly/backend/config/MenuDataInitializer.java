@@ -59,7 +59,7 @@ public class MenuDataInitializer implements CommandLineRunner {
 					"Grilled salmon fillet served over fluffy quinoa with roasted vegetables, fresh spinach, and a lemon-dill vinaigrette. Rich in omega-3 fatty acids.")
 			.price(new BigDecimal("15.99"))
 			.weight(new BigDecimal("400"))
-			.imageUrl("https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&h=500&fit=crop")
+			.imageUrl("https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=500&h=500&fit=crop")
 			.isAvailable(true)
 			.calories(new BigDecimal("520"))
 			.proteins(new BigDecimal("42"))

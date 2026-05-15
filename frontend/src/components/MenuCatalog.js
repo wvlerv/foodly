@@ -6,7 +6,12 @@ import './MenuCatalog.css';
 import { CirclePlus } from 'lucide-react';
 
 // Об'єднуємо всі пропси в один аргумент
-const MenuCatalog = ({ dishes: mockDishes, onAddToCart, showFavoritesOnly = false }) => {
+const MenuCatalog = ({
+  dishes: mockDishes,
+  onAddToCart,
+  showFavoritesOnly = false,
+  onShowErrorToast,
+}) => {
   const [dishes, setDishes] = useState([]);
   const [useFitMyDay, setUseFitMyDay] = useState(false);
   const [remainingKcal, setRemainingKcal] = useState('500');
@@ -115,7 +120,7 @@ const MenuCatalog = ({ dishes: mockDishes, onAddToCart, showFavoritesOnly = fals
     const token = localStorage.getItem('token');
 
     if (!token || token === 'undefined' || token === 'null') {
-      alert('Please log in to like dishes.');
+      onShowErrorToast('Please log in to like dishes.');
       return;
     }
 
@@ -143,17 +148,17 @@ const MenuCatalog = ({ dishes: mockDishes, onAddToCart, showFavoritesOnly = fals
         }
       } else if (response.status === 401) {
         console.error('[Favorites] Not authenticated (401)');
-        alert('Please log in to add items to favorites');
+        onShowErrorToast('Please log in to add items to favorites');
       }
     } catch (err) {
       if (err.response?.status === 401) {
         console.error('[Favorites] Not authenticated (401)');
-        alert('Please log in to add items to favorites');
+        onShowErrorToast('Please log in to add items to favorites');
         return;
       }
 
       console.error('[Favorites] Network error:', err);
-      alert(`Network error: ${err.message}`);
+      onShowErrorToast(`Network error: ${err.message}`);
     }
   };
 

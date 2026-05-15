@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import './App.css';
 import Header from './components/Header';
 import Footer from './components/Footer';
@@ -12,14 +12,24 @@ import authService from './services/authService';
 import AuthPage from './components/AuthPage';
 import api from './api/axios';
 
-function App() {
+function AppContent() {
+  const navigate = useNavigate();
   const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('token'));
   const [cartItems, setCartItems] = useState([]);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
+  const [toastType, setToastType] = useState('success'); // 'success' or 'error'
 
   const triggerToast = (message) => {
     setToastMessage(message);
+    setToastType('success');
+    setShowToast(true);
+    setTimeout(() => setShowToast(false), 3000);
+  };
+
+  const triggerErrorToast = (message) => {
+    setToastMessage(message);
+    setToastType('error');
     setShowToast(true);
     setTimeout(() => setShowToast(false), 3000);
   };
@@ -54,7 +64,7 @@ function App() {
 
     await api.post('/orders', payload);
     setCartItems([]);
-    alert('Order placed successfully! You can view it in Orders.');
+    triggerToast('Order placed successfully! You can view it in Orders.');
   };
 
   const addToCart = (dish) => {
@@ -73,6 +83,8 @@ function App() {
   const handleLogout = () => {
     authService.logout();
     setIsAuthenticated(false);
+    triggerToast('Logged out successfully!');
+    navigate('/login', { replace: true });
   };
 
   const handleLoginSuccess = () => {
@@ -83,57 +95,82 @@ function App() {
   const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
+    <div className="App">
+      {/* Передаємо cartCount у хедер, щоб він відображав цифру */}
+      <Header cartCount={cartCount} isAuthenticated={isAuthenticated} onLogout={handleLogout} />
+
+      {showToast && (
+        <div className={`toast-notification toast-notification--${toastType}`}>{toastMessage}</div>
+      )}
+
+      <main className="App__main">
+        <Routes>
+          {/* Головна сторінка - Меню */}
+          <Route
+            path="/menu"
+            element={
+              <MenuCatalog
+                dishes={mockDishes}
+                onAddToCart={addToCart}
+                onShowErrorToast={triggerErrorToast}
+              />
+            }
+          />
+
+          <Route
+            path="/login"
+            element={
+              <AuthPage onLoginSuccess={handleLoginSuccess} onShowErrorToast={triggerErrorToast} />
+            }
+          />
+
+          {/* Улюблені страви */}
+          <Route
+            path="/favorites"
+            element={
+              <MenuCatalog
+                dishes={mockDishes}
+                onAddToCart={addToCart}
+                showFavoritesOnly={true}
+                onShowErrorToast={triggerErrorToast}
+              />
+            }
+          />
+
+          {/* Сторінка аналітики (Твій графік) */}
+          <Route path="/stats" element={<NutritionChart />} />
+
+          {/* Кошик */}
+          <Route
+            path="/cart"
+            element={
+              <Cart
+                items={cartItems}
+                onUpdateQuantity={updateQuantity}
+                onRemove={removeFromCart}
+                onCheckout={handleCheckout}
+                onShowErrorToast={triggerErrorToast}
+              />
+            }
+          />
+
+          {/* Замовлення */}
+          <Route path="/orders" element={<OrdersPage />} />
+
+          {/* Редірект з порожньої адреси на меню */}
+          <Route path="/" element={<Navigate to="/menu" replace />} />
+        </Routes>
+      </main>
+
+      <Footer />
+    </div>
+  );
+}
+
+function App() {
+  return (
     <Router>
-      <div className="App">
-        {/* Передаємо cartCount у хедер, щоб він відображав цифру */}
-        <Header cartCount={cartCount} isAuthenticated={isAuthenticated} onLogout={handleLogout} />
-
-        {showToast && <div className="toast-notification">{toastMessage}</div>}
-
-        <main className="App__main">
-          <Routes>
-            {/* Головна сторінка - Меню */}
-            <Route
-              path="/menu"
-              element={<MenuCatalog dishes={mockDishes} onAddToCart={addToCart} />}
-            />
-
-            <Route path="/login" element={<AuthPage onLoginSuccess={handleLoginSuccess} />} />
-
-            {/* Улюблені страви */}
-            <Route
-              path="/favorites"
-              element={
-                <MenuCatalog dishes={mockDishes} onAddToCart={addToCart} showFavoritesOnly={true} />
-              }
-            />
-
-            {/* Сторінка аналітики (Твій графік) */}
-            <Route path="/stats" element={<NutritionChart />} />
-
-            {/* Кошик */}
-            <Route
-              path="/cart"
-              element={
-                <Cart
-                  items={cartItems}
-                  onUpdateQuantity={updateQuantity}
-                  onRemove={removeFromCart}
-                  onCheckout={handleCheckout}
-                />
-              }
-            />
-
-            {/* Замовлення */}
-            <Route path="/orders" element={<OrdersPage />} />
-
-            {/* Редірект з порожньої адреси на меню */}
-            <Route path="/" element={<Navigate to="/menu" replace />} />
-          </Routes>
-        </main>
-
-        <Footer />
-      </div>
+      <AppContent />
     </Router>
   );
 }
