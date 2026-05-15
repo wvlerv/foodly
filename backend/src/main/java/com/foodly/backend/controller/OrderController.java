@@ -3,7 +3,6 @@ package com.foodly.backend.controller;
 import com.foodly.backend.dto.OrderResponseDto;
 import com.foodly.backend.dto.OrderRequestDto;
 import com.foodly.backend.service.OrderService;
-import java.security.Principal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.security.core.Authentication;
