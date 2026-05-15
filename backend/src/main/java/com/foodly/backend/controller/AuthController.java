@@ -24,34 +24,30 @@ public class AuthController {
 		log.info("LOG-01: Received registration request for email: {}", maskEmail(request.getEmail()));
 		try {
 			userService.registerNewUser(request);
-			return ResponseEntity.ok("User registered successfully as CLIENT!");
+			return ResponseEntity.ok(Map.of("message", "User registered successfully!"));
 		}
-		catch (RuntimeException e) {
-			return ResponseEntity.badRequest().body(e.getMessage());
+		catch (org.springframework.web.server.ResponseStatusException e) {
+			return ResponseEntity.status(e.getStatusCode()).body(Map.of("message", e.getReason()));
+		}
+		catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", e.getMessage()));
 		}
 	}
 
 	@PostMapping("/login")
 	public ResponseEntity<?> login(@RequestBody AuthRequest loginRequest) {
 		log.info("LOG-04: Login attempt for user: {}", maskEmail(loginRequest.getEmail()));
-
 		try {
 			String token = userService.authenticateUser(loginRequest);
-
-			log.info("LOG-05: User {} logged in successfully.", maskEmail(loginRequest.getEmail()));
 			return ResponseEntity.ok(Map.of("token", token));
-
 		}
 		catch (BadCredentialsException e) {
-			log.warn("LOG-08: Login failed - invalid credentials for user: {}", maskEmail(loginRequest.getEmail()));
-			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid email or password");
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Invalid email or password"));
 		}
 		catch (Exception e) {
-			log.error("LOG-09: Unexpected error during login: {}", e.getMessage());
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred");
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("message", "An unexpected error occurred"));
 		}
 	}
-
 	private String maskEmail(String email) {
 		if (email == null || !email.contains("@"))
 			return "****";

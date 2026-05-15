@@ -21,10 +21,14 @@ const normalizeDish = (dish) => ({
   isAvailable: dish.isAvailable ?? dish.available ?? true,
 });
 
-// Add authorization header to all requests
 apiClient.interceptors.request.use((config) => {
-  const token = localStorage.getItem('authToken') || 'MOCK_TOKEN';
-  config.headers.Authorization = `Bearer ${token}`;
+  const token = localStorage.getItem('token');
+  if (token && token !== 'undefined' && token !== 'null') {
+    config.headers.Authorization = `Bearer ${token}`;
+  } else {
+    delete config.headers.Authorization;
+  }
+
   return config;
 });
 
