@@ -1,10 +1,15 @@
 package com.foodly.backend.service;
 
 import com.foodly.backend.dto.OrderResponseDto;
+import com.foodly.backend.dto.OrderRequestDto;
+import com.foodly.backend.dto.OrderItemRequestDto;
 import com.foodly.backend.entity.Dish;
 import com.foodly.backend.entity.Order;
 import com.foodly.backend.entity.OrderItem;
+import com.foodly.backend.entity.User;
 import com.foodly.backend.repository.OrderRepository;
+import com.foodly.backend.repository.UserRepository;
+import com.foodly.backend.repository.DishRepository;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
@@ -24,12 +29,64 @@ public class OrderService {
 
 	private final OrderRepository orderRepository;
 
+	private final UserRepository userRepository;
+
+	private final DishRepository dishRepository;
+
 	@Transactional(readOnly = true)
 	public List<OrderResponseDto> getAllOrders() {
 		List<Order> orders = orderRepository.findAll();
 		logger.info("Loaded {} orders from repository", orders.size());
 
 		return orders.stream().map(this::toDto).collect(Collectors.toList());
+	}
+
+	@Transactional(readOnly = true)
+	public List<OrderResponseDto> getOrdersForUser(String email) {
+		User user = userRepository.findByEmail(email)
+			.orElseThrow(() -> new RuntimeException("User not found: " + email));
+
+		List<Order> orders = orderRepository.findByUserOrderByCreatedAtDesc(user);
+		logger.info("Loaded {} orders for user {}", orders.size(), email);
+
+		return orders.stream().map(this::toDto).collect(Collectors.toList());
+	}
+
+	@Transactional
+	public OrderResponseDto createOrderForUser(String email, OrderRequestDto request) {
+		User user = userRepository.findByEmail(email)
+			.orElseThrow(() -> new RuntimeException("User not found: " + email));
+
+		Order order = Order.builder()
+			.user(user)
+			.status(com.foodly.backend.entity.OrderStatus.CREATED)
+			.createdAt(java.time.LocalDateTime.now())
+			.items(new java.util.ArrayList<>())
+			.build();
+
+		java.math.BigDecimal total = java.math.BigDecimal.ZERO;
+
+		if (request.getItems() != null) {
+			for (OrderItemRequestDto itemReq : request.getItems()) {
+				Dish dish = dishRepository.findById(itemReq.getDishId())
+					.orElseThrow(() -> new RuntimeException("Dish not found: " + itemReq.getDishId()));
+
+				OrderItem item = OrderItem.builder()
+					.dish(dish)
+					.quantity(itemReq.getQuantity())
+					.priceAtPurchase(dish.getPrice())
+					.build();
+
+				order.addItem(item);
+				total = total.add(item.getPriceAtPurchase().multiply(java.math.BigDecimal.valueOf(item.getQuantity())));
+			}
+		}
+
+		order.setTotalPrice(total);
+
+		Order saved = orderRepository.save(order);
+		logger.info("Created order {} for user {}", saved.getId(), email);
+		return toDto(saved);
 	}
 
 	private OrderResponseDto toDto(Order order) {

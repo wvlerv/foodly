@@ -10,6 +10,7 @@ import NutritionChart from './components/NutritionChart';
 import Cart from './components/Cart';
 import authService from './services/authService';
 import AuthPage from './components/AuthPage';
+import api from './api/axios';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('token'));
@@ -33,9 +34,27 @@ function App() {
     setCartItems((prev) => prev.filter((item) => item.id !== id));
   };
 
-  const handleCheckout = () => {
-    alert('Order placed successfully! Your analytics will update shortly.');
+  const handleCheckout = async () => {
+    const token = localStorage.getItem('token');
+
+    if (!token || token === 'undefined' || token === 'null') {
+      throw new Error('Please log in to place an order.');
+    }
+
+    if (cartItems.length === 0) {
+      throw new Error('Your cart is empty.');
+    }
+
+    const payload = {
+      items: cartItems.map((item) => ({
+        dishId: item.id,
+        quantity: item.quantity,
+      })),
+    };
+
+    await api.post('/orders', payload);
     setCartItems([]);
+    alert('Order placed successfully! You can view it in Orders.');
   };
 
   const addToCart = (dish) => {

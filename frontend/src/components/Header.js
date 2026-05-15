@@ -7,7 +7,7 @@ import { LogOut, LogIn } from 'lucide-react';
 /**
  * Header Component - Navigation and branding for Foodly
  */
-const Header = ({ cartCount, isAuthenticated, onLogout })  => {
+const Header = ({ cartCount, isAuthenticated, onLogout }) => {
   const location = useLocation();
   const getActiveClass = (path) => (location.pathname === path ? 'active' : '');
 

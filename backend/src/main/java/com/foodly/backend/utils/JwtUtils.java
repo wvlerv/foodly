@@ -30,40 +30,38 @@ public class JwtUtils {
 
 	public String generateToken(String email) {
 		return Jwts.builder()
-				.subject(email)
-				.issuedAt(new Date())
-				.expiration(new Date((new Date()).getTime() + jwtExpirationMs))
-				.signWith(key)
-				.compact();
+			.subject(email)
+			.issuedAt(new Date())
+			.expiration(new Date((new Date()).getTime() + jwtExpirationMs))
+			.signWith(key)
+			.compact();
 	}
 
 	public String getEmailFromToken(String token) {
-		return Jwts.parser()
-				.verifyWith(key)
-				.build()
-				.parseSignedClaims(token)
-				.getPayload()
-				.getSubject();
+		return Jwts.parser().verifyWith(key).build().parseSignedClaims(token).getPayload().getSubject();
 	}
 
 	public boolean validateToken(String token) {
 		try {
-			Jwts.parser()
-					.verifyWith(key)
-					.build()
-					.parseSignedClaims(token);
+			Jwts.parser().verifyWith(key).build().parseSignedClaims(token);
 			return true;
-		} catch (MalformedJwtException e) {
+		}
+		catch (MalformedJwtException e) {
 			log.error("Invalid JWT token: {}", e.getMessage());
-		} catch (ExpiredJwtException e) {
+		}
+		catch (ExpiredJwtException e) {
 			log.error("JWT token is expired: {}", e.getMessage());
-		} catch (UnsupportedJwtException e) {
+		}
+		catch (UnsupportedJwtException e) {
 			log.error("JWT token is unsupported: {}", e.getMessage());
-		} catch (IllegalArgumentException e) {
+		}
+		catch (IllegalArgumentException e) {
 			log.error("JWT claims string is empty: {}", e.getMessage());
-		} catch (JwtException e) {
+		}
+		catch (JwtException e) {
 			log.error("JWT validation error: {}", e.getMessage());
 		}
 		return false;
 	}
+
 }

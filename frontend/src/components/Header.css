@@ -203,11 +203,33 @@
   color: #222;
 }
 
-.logout-btn, .login-link {
+.logout-btn,
+.login-link {
   color: #222;
 }
 
-.logout-btn:hover, .login-link:hover {
+.logout-btn {
+  color: #d92d20;
+}
+
+.logout-btn svg,
+.logout-btn svg *,
+.logout-btn .auth-text {
+  color: #d92d20;
+}
+
+.logout-btn:hover,
+.login-link:hover {
   background-color: #f5f5f5;
-  color: #667eea;
+}
+
+.logout-btn:hover {
+  color: #b42318;
+  background-color: #fef3f2;
+}
+
+.logout-btn:hover svg,
+.logout-btn:hover svg *,
+.logout-btn:hover .auth-text {
+  color: #b42318;
 }

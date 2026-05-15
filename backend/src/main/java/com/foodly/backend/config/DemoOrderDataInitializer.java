@@ -17,13 +17,14 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-@Configuration
+@Component
+@ConditionalOnProperty(prefix = "demo.data", name = "enabled", havingValue = "true")
 @RequiredArgsConstructor
-public class DemoOrderDataInitializer {
+public class DemoOrderDataInitializer implements CommandLineRunner {
 
 	private static final Logger logger = LoggerFactory.getLogger(DemoOrderDataInitializer.class);
 
@@ -33,9 +34,9 @@ public class DemoOrderDataInitializer {
 
 	private final UserRepository userRepository;
 
-	@Bean
-	CommandLineRunner seedDemoOrders() {
-		return args -> initializeIfNeeded();
+	@Override
+	public void run(String... args) {
+		initializeIfNeeded();
 	}
 
 	@Transactional
