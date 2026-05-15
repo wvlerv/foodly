@@ -51,6 +51,15 @@ public class Order {
 	@Column(name = "total_price", nullable = false)
 	private BigDecimal totalPrice;
 
+	@Column(name = "delivery_address", nullable = false, length = 500)
+	private String deliveryAddress;
+
+	@Column(name = "contact_phone", nullable = false, length = 50)
+	private String contactPhone;
+
+	@Column(name = "payment_method", nullable = false, length = 50)
+	private String paymentMethod;
+
 	@Column(name = "created_at", nullable = false)
 	private LocalDateTime createdAt;
 

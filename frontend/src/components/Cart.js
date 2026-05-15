@@ -3,19 +3,9 @@ import { Trash2, Plus, Minus, ShoppingBag } from 'lucide-react';
 import './Cart.css';
 import { useNavigate } from 'react-router-dom';
 
-const Cart = ({ items, onUpdateQuantity, onRemove, onCheckout, onShowErrorToast }) => {
+const Cart = ({ items, onUpdateQuantity, onRemove }) => {
   const navigate = useNavigate(); // Використовуємо цей хук для переходів
   const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-
-  // Функція, яка спрацьовує при оформленні замовлення
-  const handleCheckout = async () => {
-    try {
-      await onCheckout();
-      navigate('/orders');
-    } catch (error) {
-      onShowErrorToast(error.message || 'Could not place order. Please try again.');
-    }
-  };
 
   if (items.length === 0) {
     return (
@@ -69,8 +59,11 @@ const Cart = ({ items, onUpdateQuantity, onRemove, onCheckout, onShowErrorToast 
             <span>Total amount</span>
             <span>${total.toFixed(2)}</span>
           </div>
-          {/* Викликаємо нашу нову функцію handleCheckout */}
-          <button className="checkout-btn" onClick={handleCheckout}>
+          <button
+            className="checkout-btn"
+            onClick={() => navigate('/checkout')}
+            disabled={!items.length}
+          >
             Checkout
           </button>
         </div>

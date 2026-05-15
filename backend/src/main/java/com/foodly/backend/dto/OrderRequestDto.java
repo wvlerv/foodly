@@ -13,6 +13,12 @@ import lombok.NoArgsConstructor;
 @Builder
 public class OrderRequestDto implements Serializable {
 
+	private String deliveryAddress;
+
+	private String contactPhone;
+
+	private String paymentMethod;
+
 	private List<OrderItemRequestDto> items;
 
 }
