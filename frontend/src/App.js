@@ -5,12 +5,12 @@ import Header from './components/Header';
 import Footer from './components/Footer';
 import MenuCatalog from './components/MenuCatalog';
 import OrdersPage from './components/OrdersPage';
+import CheckoutPage from './components/CheckoutPage';
 import mockDishes from './data/mockDishes.json';
 import NutritionChart from './components/NutritionChart';
 import Cart from './components/Cart';
 import authService from './services/authService';
 import AuthPage from './components/AuthPage';
-import api from './api/axios';
 
 function AppContent() {
   const navigate = useNavigate();
@@ -42,29 +42,6 @@ function AppContent() {
 
   const removeFromCart = (id) => {
     setCartItems((prev) => prev.filter((item) => item.id !== id));
-  };
-
-  const handleCheckout = async () => {
-    const token = localStorage.getItem('token');
-
-    if (!token || token === 'undefined' || token === 'null') {
-      throw new Error('Please log in to place an order.');
-    }
-
-    if (cartItems.length === 0) {
-      throw new Error('Your cart is empty.');
-    }
-
-    const payload = {
-      items: cartItems.map((item) => ({
-        dishId: item.id,
-        quantity: item.quantity,
-      })),
-    };
-
-    await api.post('/orders', payload);
-    setCartItems([]);
-    triggerToast('Order placed successfully! You can view it in Orders.');
   };
 
   const addToCart = (dish) => {
@@ -148,7 +125,18 @@ function AppContent() {
                 items={cartItems}
                 onUpdateQuantity={updateQuantity}
                 onRemove={removeFromCart}
-                onCheckout={handleCheckout}
+                onShowErrorToast={triggerErrorToast}
+              />
+            }
+          />
+
+          <Route
+            path="/checkout"
+            element={
+              <CheckoutPage
+                items={cartItems}
+                onClearCart={() => setCartItems([])}
+                onShowSuccessToast={triggerToast}
                 onShowErrorToast={triggerErrorToast}
               />
             }

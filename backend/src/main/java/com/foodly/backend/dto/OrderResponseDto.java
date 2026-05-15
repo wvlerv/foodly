@@ -20,6 +20,12 @@ public class OrderResponseDto implements Serializable {
 
 	private LocalDateTime createdAt;
 
+	private String deliveryAddress;
+
+	private String contactPhone;
+
+	private String paymentMethod;
+
 	private String status;
 
 	private BigDecimal totalPrice;
