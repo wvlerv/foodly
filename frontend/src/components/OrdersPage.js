@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import api from '../api/axios';
 import OrderCard from './OrderCard';
-import { Package } from 'lucide-react';
+import { Archive } from 'lucide-react';
 import './OrdersPage.css';
 import './DishCard.css';
 
@@ -14,9 +13,25 @@ const OrdersPage = () => {
     const fetchOrders = async () => {
       try {
         setLoading(true);
-        const resp = await api.get('/orders');
-        setOrders(resp.data || []);
-        setError(null);
+        const response = await fetch('http://localhost:8080/api/orders/my-orders', {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setOrders(Array.isArray(data) ? data : []);
+          setError(null);
+        } else {
+          setOrders([]);
+          if (response.status === 401) {
+            setError('Please log in to view your orders.');
+          } else {
+            setError('Could not load orders.');
+          }
+        }
       } catch (e) {
         console.error('Failed to load orders', e);
         setError('Could not load orders.');
@@ -41,7 +56,7 @@ const OrdersPage = () => {
     return (
       <div className="orders-page__center">
         <div className="orders-page__empty">
-          <Package size={56} className="orders-page__empty-icon" />
+          <Archive size={56} className="orders-page__empty-icon" />
           <h2>Unable to load orders</h2>
           <p>{error}</p>
         </div>
@@ -53,9 +68,9 @@ const OrdersPage = () => {
     return (
       <div className="orders-page__center">
         <div className="orders-page__empty">
-          <Package size={56} className="orders-page__empty-icon" />
+          <Archive size={56} className="orders-page__empty-icon" />
           <h2>No orders yet</h2>
-          <p>Your order history will appear here.</p>
+          <p>Place your first order from the cart to see it here!</p>
         </div>
       </div>
     );

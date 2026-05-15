@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import DishCard from './DishCard';
 import { getAllDishes } from '../services/dishService';
+import api from '../api/axios';
 import './MenuCatalog.css';
 import { CirclePlus } from 'lucide-react';
 
@@ -14,7 +15,7 @@ const MenuCatalog = ({ dishes: mockDishes, onAddToCart, showFavoritesOnly = fals
   const [favoriteIds, setFavoriteIds] = useState([]);
   const [selectedAllergens, setSelectedAllergens] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [, setError] = useState(null);
   const [availableAllergens, setAvailableAllergens] = useState([]);
 
   // Helper function to get JWT token from localStorage
@@ -30,21 +31,21 @@ const MenuCatalog = ({ dishes: mockDishes, onAddToCart, showFavoritesOnly = fals
   useEffect(() => {
     const fetchFavorites = async () => {
       try {
-        const response = await fetch('/api/profile/favorites', {
-          method: 'GET',
+        const response = await api.get('/profile/favorites', {
           headers: getAuthHeaders(),
         });
 
-        if (response.ok) {
-          const favoriteDishes = await response.json();
-          // Extract IDs from the returned dish objects
-          const ids = favoriteDishes.map((dish) => dish.id);
-          setFavoriteIds(ids);
-        } else if (response.status === 401) {
+        const favoriteDishes = response.data;
+        // Extract IDs from the returned dish objects
+        const ids = favoriteDishes.map((dish) => dish.id);
+        setFavoriteIds(ids);
+      } catch (err) {
+        if (err.response?.status === 401) {
           // User not authenticated, initialize with empty array
           setFavoriteIds([]);
+          return;
         }
-      } catch (err) {
+
         console.error('Error fetching favorites:', err);
         setFavoriteIds([]);
       }
@@ -109,22 +110,27 @@ const MenuCatalog = ({ dishes: mockDishes, onAddToCart, showFavoritesOnly = fals
    */
   const toggleFavorite = async (dishId) => {
     const isFavorited = favoriteIds.includes(dishId);
-    const method = isFavorited ? 'DELETE' : 'POST';
-    const url = `/api/profile/favorites/${dishId}`;
+    const method = isFavorited ? 'delete' : 'post';
+    const url = `/profile/favorites/${dishId}`;
+    const token = localStorage.getItem('token');
+
+    if (!token || token === 'undefined' || token === 'null') {
+      alert('Please log in to like dishes.');
+      return;
+    }
 
     try {
       console.log(
-        `[Favorites] ${method} request to ${url}, Token: ${localStorage.getItem('token') ? 'present' : 'missing'}`
+        `[Favorites] ${method} request to ${url}, Token: ${token ? 'present' : 'missing'}`
       );
 
-      const response = await fetch(url, {
-        method,
-        headers: getAuthHeaders(),
-      });
+      const response = isFavorited
+        ? await api.delete(url, { headers: getAuthHeaders() })
+        : await api.post(url, null, { headers: getAuthHeaders() });
 
       console.log(`[Favorites] Response status: ${response.status}`);
 
-      if (response.ok) {
+      if (response.status >= 200 && response.status < 300) {
         // Update state only if fetch was successful
         if (isFavorited) {
           // Remove from favorites
@@ -138,12 +144,14 @@ const MenuCatalog = ({ dishes: mockDishes, onAddToCart, showFavoritesOnly = fals
       } else if (response.status === 401) {
         console.error('[Favorites] Not authenticated (401)');
         alert('Please log in to add items to favorites');
-      } else {
-        const errorText = await response.text();
-        console.error(`[Favorites] Error (${response.status}): ${response.statusText}`, errorText);
-        alert(`Error: ${response.status} - ${response.statusText}`);
       }
     } catch (err) {
+      if (err.response?.status === 401) {
+        console.error('[Favorites] Not authenticated (401)');
+        alert('Please log in to add items to favorites');
+        return;
+      }
+
       console.error('[Favorites] Network error:', err);
       alert(`Network error: ${err.message}`);
     }

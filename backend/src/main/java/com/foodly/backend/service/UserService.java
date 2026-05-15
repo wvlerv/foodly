@@ -32,8 +32,7 @@ public class UserService {
 		if (userRepository.existsByEmail(request.getEmail())) {
 			log.warn("LOG-02: Registration failed - email {} already exists", maskEmail(request.getEmail()));
 			throw new org.springframework.web.server.ResponseStatusException(
-					org.springframework.http.HttpStatus.CONFLICT, "Email already exists"
-			);
+					org.springframework.http.HttpStatus.CONFLICT, "Email already exists");
 		}
 		User user = User.builder()
 			.email(request.getEmail())

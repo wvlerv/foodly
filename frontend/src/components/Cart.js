@@ -8,9 +8,13 @@ const Cart = ({ items, onUpdateQuantity, onRemove, onCheckout }) => {
   const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
   // Функція, яка спрацьовує при оформленні замовлення
-  const handleCheckout = () => {
-    onCheckout(); // Викликаємо очищення кошика в App.js
-    navigate('/stats'); // Перенаправляємо на сторінку аналітики
+  const handleCheckout = async () => {
+    try {
+      await onCheckout();
+      navigate('/orders');
+    } catch (error) {
+      alert(error.message || 'Could not place order. Please try again.');
+    }
   };
 
   if (items.length === 0) {
