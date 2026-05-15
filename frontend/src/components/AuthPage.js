@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import authService from '../services/authService';
 import './AuthPage.css';
 
-const AuthPage = ({ onLoginSuccess }) => {
+const AuthPage = ({ onLoginSuccess, onShowErrorToast }) => {
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({
     email: '',
@@ -63,7 +63,7 @@ const AuthPage = ({ onLoginSuccess }) => {
         navigate('/menu');
       } else {
         await authService.register(formData.email, formData.password);
-        alert('Registration successful! You can now log in.');
+        setServerError('');
         setIsLogin(true);
         setFormData((prev) => ({ ...prev, password: '', confirmPassword: '' }));
       }

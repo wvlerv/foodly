@@ -3,7 +3,7 @@ import { Trash2, Plus, Minus, ShoppingBag } from 'lucide-react';
 import './Cart.css';
 import { useNavigate } from 'react-router-dom';
 
-const Cart = ({ items, onUpdateQuantity, onRemove, onCheckout }) => {
+const Cart = ({ items, onUpdateQuantity, onRemove, onCheckout, onShowErrorToast }) => {
   const navigate = useNavigate(); // Використовуємо цей хук для переходів
   const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
@@ -13,7 +13,7 @@ const Cart = ({ items, onUpdateQuantity, onRemove, onCheckout }) => {
       await onCheckout();
       navigate('/orders');
     } catch (error) {
-      alert(error.message || 'Could not place order. Please try again.');
+      onShowErrorToast(error.message || 'Could not place order. Please try again.');
     }
   };
 

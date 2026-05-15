@@ -72,6 +72,14 @@ h6 {
   border-left: 4px solid #2ecc71;
 }
 
+.toast-notification--success {
+  border-left-color: #2ecc71;
+}
+
+.toast-notification--error {
+  border-left-color: #e74c3c;
+}
+
 @keyframes slideIn {
   from {
     transform: translateX(100%);
