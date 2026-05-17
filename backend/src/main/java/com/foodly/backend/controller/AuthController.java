@@ -1,6 +1,7 @@
 package com.foodly.backend.controller;
 
-import com.foodly.backend.dto.AuthRequest;
+import com.foodly.backend.dto.LoginRequest;
+import com.foodly.backend.dto.RegisterRequest;
 import com.foodly.backend.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +21,7 @@ public class AuthController {
 	private final UserService userService;
 
 	@PostMapping("/register")
-	public ResponseEntity<?> register(@RequestBody AuthRequest request) {
+	public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
 		log.info("LOG-01: Received registration request for email: {}", maskEmail(request.getEmail()));
 		try {
 			userService.registerNewUser(request);
@@ -35,7 +36,7 @@ public class AuthController {
 	}
 
 	@PostMapping("/login")
-	public ResponseEntity<?> login(@RequestBody AuthRequest loginRequest) {
+	public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
 		log.info("LOG-04: Login attempt for user: {}", maskEmail(loginRequest.getEmail()));
 		try {
 			String token = userService.authenticateUser(loginRequest);

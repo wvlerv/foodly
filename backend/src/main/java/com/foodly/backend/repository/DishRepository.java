@@ -39,4 +39,17 @@ public interface DishRepository extends JpaRepository<Dish, UUID> {
 	@Query("SELECT d FROM Dish d WHERE d.isAvailable = true ORDER BY d.name ASC")
 	List<Dish> findAllAvailable();
 
+	/**
+	 * Fetch all unique non-null allergens used by dishes in the menu.
+	 * @return a list of distinct allergen names
+	 */
+	@Query("""
+			SELECT DISTINCT a
+			FROM Dish d
+			JOIN d.allergens a
+			WHERE a IS NOT NULL AND TRIM(a) <> ''
+			ORDER BY a ASC
+			""")
+	List<String> findDistinctAllergens();
+
 }

@@ -1,6 +1,7 @@
 package com.foodly.backend.service;
 
 import com.foodly.backend.dto.HealthProfileDto;
+import com.foodly.backend.dto.UserProfileDto;
 import com.foodly.backend.entity.Dish;
 import com.foodly.backend.entity.HealthProfile;
 import com.foodly.backend.entity.User;
@@ -31,6 +32,16 @@ public class ProfileService {
 	public HealthProfile updateProfile(HealthProfileDto dto, String email) {
 		User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
 
+		if (dto.getFirstName() != null) {
+			user.setFirstName(dto.getFirstName());
+		}
+		if (dto.getLastName() != null) {
+			user.setLastName(dto.getLastName());
+		}
+		if (dto.getUsername() != null) {
+			user.setUsername(dto.getUsername());
+		}
+
 		HealthProfile profile = user.getHealthProfile();
 
 		if (profile == null) {
@@ -56,10 +67,10 @@ public class ProfileService {
 	}
 
 	@Transactional(readOnly = true)
-	public HealthProfile getProfileByEmail(String email) {
-		return userRepository.findByEmail(email)
-			.map(User::getHealthProfile)
-			.orElseThrow(() -> new RuntimeException("Profile not found for user: " + email));
+	public UserProfileDto getProfileByEmail(String email) {
+		User user = userRepository.findByEmail(email)
+			.orElseThrow(() -> new RuntimeException("User not found for email: " + email));
+		return UserProfileDto.from(user);
 	}
 
 	/**

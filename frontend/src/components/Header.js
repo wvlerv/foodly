@@ -51,9 +51,13 @@ const Header = ({ cartCount, isAuthenticated, onLogout }) => {
             {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
           </Link>
 
-          <button className="header__icon-button" title="User Profile">
+          <Link
+            to={isAuthenticated ? '/profile' : '/login'}
+            className={`header__icon-button ${getActiveClass('/profile')}`}
+            title="User Profile"
+          >
             <User size={24} />
-          </button>
+          </Link>
           {isAuthenticated ? (
             <button className="header__icon-button logout-btn" onClick={onLogout} title="Logout">
               <LogOut size={24} />

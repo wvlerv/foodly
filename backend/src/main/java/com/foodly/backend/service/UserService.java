@@ -1,6 +1,7 @@
 package com.foodly.backend.service;
 
-import com.foodly.backend.dto.AuthRequest;
+import com.foodly.backend.dto.LoginRequest;
+import com.foodly.backend.dto.RegisterRequest;
 import com.foodly.backend.entity.Role;
 import com.foodly.backend.entity.User;
 import com.foodly.backend.repository.UserRepository;
@@ -28,7 +29,7 @@ public class UserService {
 	private final JwtUtils jwtUtils;
 
 	@Transactional
-	public User registerNewUser(AuthRequest request) {
+	public User registerNewUser(RegisterRequest request) {
 		if (userRepository.existsByEmail(request.getEmail())) {
 			log.warn("LOG-02: Registration failed - email {} already exists", maskEmail(request.getEmail()));
 			throw new org.springframework.web.server.ResponseStatusException(
@@ -36,6 +37,9 @@ public class UserService {
 		}
 		User user = User.builder()
 			.email(request.getEmail())
+			.firstName(request.getFirstName())
+			.lastName(request.getLastName())
+			.username(request.getUsername())
 			.password(passwordEncoder.encode(request.getPassword()))
 			.role(Role.CLIENT)
 			.build();
@@ -47,7 +51,7 @@ public class UserService {
 		return savedUser;
 	}
 
-	public String authenticateUser(AuthRequest loginRequest) {
+	public String authenticateUser(LoginRequest loginRequest) {
 		UsernamePasswordAuthenticationToken authRequest = new UsernamePasswordAuthenticationToken(
 				loginRequest.getEmail(), loginRequest.getPassword());
 		Authentication authentication = authenticationManager.authenticate(authRequest);

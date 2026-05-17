@@ -4,7 +4,7 @@ import './OrderCard.css';
 
 const statusColors = {
   CREATED: '#6b7280', // gray - newly created
-  PAID: '#3b82f6', // blue - payment confirmed
+  PAID: '#00b894', // green - payment confirmed
   PREPARING: '#f59e0b', // amber - being prepared
   DELIVERED: '#10b981', // green - delivered
   CANCELLED: '#ef4444', // red - cancelled

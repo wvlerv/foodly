@@ -1,15 +1,14 @@
 import React from 'react';
-import { AlertCircle, AlertTriangle, Heart, ShoppingCart } from 'lucide-react'; // Додав ShoppingCart для однотипності
+import { AlertTriangle, Heart, ShoppingCart } from 'lucide-react';
 import './DishCard.css';
 
 const DishCard = ({
   dish,
   onAddToCart,
-  selectedAllergen = '',
   isFavorite = false,
   onToggleFavorite = null,
+  matchedAllergens = [],
 }) => {
-  // 1. Безпечне отримання значень (якщо раптом якогось поля немає, ставимо 0)
   const {
     name = 'Unknown Dish',
     price = 0,
@@ -21,14 +20,7 @@ const DishCard = ({
   } = dish;
 
   const isAvailable = dish.available ?? dish.isAvailable ?? true;
-  const allergens = Array.isArray(dish.allergens) ? dish.allergens : [];
 
-  const normalizedSelectedAllergen = selectedAllergen.trim().toLowerCase();
-  const matchedAllergen = normalizedSelectedAllergen
-    ? allergens.find((a) => a.toLowerCase() === normalizedSelectedAllergen)
-    : null;
-
-  // 2. Розрахунок калорійності макросів (4-9-4 правило)
   const totalMacroCalories = proteins * 4 + carbohydrates * 4 + fats * 9;
 
   const getPercentage = (val, multiplier) =>
@@ -44,15 +36,6 @@ const DishCard = ({
         <img src={imageUrl} alt={name} className="dish-card__image" />
 
         {!isAvailable && <div className="dish-card__unavailable">Out of Stock</div>}
-
-        {matchedAllergen && (
-          <div
-            className="dish-card__allergen-alert"
-            title={`Contains allergen: ${matchedAllergen}`}
-          >
-            <AlertCircle size={32} color="#ff4444" fill="#ff4444" />
-          </div>
-        )}
 
         <button
           className={`dish-card__favorite-btn ${isFavorite ? 'active' : ''}`}
@@ -70,24 +53,28 @@ const DishCard = ({
       </div>
 
       <div className="dish-card__body">
-        <h3 className="dish-card__name">{name}</h3>
+        <div className="dish-card__title-wrapper">
+          <h3 className="dish-card__name">{name}</h3>
+          {matchedAllergens.length > 0 && (
+            <span className="dish-card__title-warning" title="Contains your allergen">
+              <AlertTriangle size={18} color="#dc2626" fill="#dc2626" />
+              <span className="dish-card__title-warning-mark">!</span>
+            </span>
+          )}
+        </div>
+
         <p className="dish-card__description">{dish.description}</p>
 
         <div className="dish-card__meta-row">
-          {/* Додав Number() та перевірку, щоб toFixed не видавав помилку */}
           <div className="dish-card__price">${Number(price).toFixed(2)}</div>
 
-          {allergens.length > 0 && (
+          {matchedAllergens.length > 0 && (
             <div className="dish-card__allergen-badges">
-              {allergens.slice(0, 2).map(
-                (
-                  allergen // Обмежив до 2, щоб не ламало верстку
-                ) => (
-                  <span className="dish-card__allergen-badge" key={allergen}>
-                    <AlertTriangle size={14} /> {allergen}
-                  </span>
-                )
-              )}
+              {matchedAllergens.map((allergen) => (
+                <span className="dish-card__allergen-badge" key={allergen}>
+                  <AlertTriangle size={14} /> {allergen}
+                </span>
+              ))}
             </div>
           )}
         </div>
@@ -98,7 +85,6 @@ const DishCard = ({
           </div>
 
           <div className="nutrition-bars">
-            {/* Рендеримо бари (код такий самий, але чистіший) */}
             {[
               { label: 'Prot.', val: proteins, pct: proteinPercentage, class: 'protein' },
               { label: 'Fats', val: fats, pct: fatsPercentage, class: 'fat' },

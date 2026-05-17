@@ -9,6 +9,12 @@ import java.util.Set;
 @Data
 public class HealthProfileDto {
 
+	private String firstName;
+
+	private String lastName;
+
+	private String username;
+
 	private int age;
 
 	private BigDecimal weight;
