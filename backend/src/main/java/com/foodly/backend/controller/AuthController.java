@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.authentication.LockedException;
 
 import java.util.Map;
 
@@ -39,15 +40,19 @@ public class AuthController {
 	public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
 		log.info("LOG-04: Login attempt for user: {}", maskEmail(loginRequest.getEmail()));
 		try {
-			String token = userService.authenticateUser(loginRequest);
-			return ResponseEntity.ok(Map.of("token", token));
+			Map<String, String> authResponse = userService.authenticateUser(loginRequest);
+			return ResponseEntity.ok(authResponse);
 		}
 		catch (BadCredentialsException e) {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Invalid email or password"));
 		}
+		catch (LockedException e) {
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message", e.getMessage()));
+		}
 		catch (Exception e) {
+			log.error("Unexpected error during login", e);
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-				.body(Map.of("message", "An unexpected error occurred"));
+					.body(Map.of("message", "An unexpected error occurred"));
 		}
 	}
 

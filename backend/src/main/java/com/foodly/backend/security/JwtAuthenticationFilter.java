@@ -1,5 +1,7 @@
 package com.foodly.backend.security;
 
+import com.foodly.backend.entity.User;
+import com.foodly.backend.repository.UserRepository;
 import com.foodly.backend.utils.JwtUtils;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -11,12 +13,14 @@ import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -25,6 +29,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 	private final JwtUtils jwtUtils;
 	private final TokenBlacklistService blacklistService;
+	private final UserRepository userRepository;
 
 	@Override
 	protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response,
@@ -34,12 +39,28 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 			if (jwt != null && !blacklistService.isBlacklisted(jwt) && jwtUtils.validateToken(jwt)) {
 				String email = jwtUtils.getEmailFromToken(jwt);
 
-				log.debug("LOG-06: JWT validated for user: {}", email);
-				UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(email,
-						null, new ArrayList<>());
+				Optional<User> userOptional = userRepository.findByEmail(email);
 
-				authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-				SecurityContextHolder.getContext().setAuthentication(authentication);
+				if (userOptional.isPresent()) {
+					User user = userOptional.get();
+
+					if (user.isBanned()) {
+						log.warn("LOG-09: Access denied - User {} is banned", email);
+						response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+						response.setContentType("application/json");
+						response.getWriter().write("{\"message\": \"Your account has been banned.\"}");
+						return;
+					}
+
+					log.debug("LOG-06: JWT validated for user: {}", email);
+					String roleWithPrefix = "ROLE_" + user.getRole().name();
+					List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(roleWithPrefix));
+					UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+							email, null, authorities);
+
+					authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+					SecurityContextHolder.getContext().setAuthentication(authentication);
+				}
 			}
 			else if (jwt != null && blacklistService.isBlacklisted(jwt)) {
 				log.warn("LOG-10: Access denied - token is blacklisted");

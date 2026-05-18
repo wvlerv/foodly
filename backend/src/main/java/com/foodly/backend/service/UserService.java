@@ -15,6 +15,10 @@ import org.springframework.transaction.annotation.Transactional;
 import com.foodly.backend.utils.JwtUtils;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.authentication.LockedException;
+import org.springframework.security.authentication.BadCredentialsException;
+
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -54,11 +58,25 @@ public class UserService {
 		return savedUser;
 	}
 
-	public String authenticateUser(LoginRequest loginRequest) {
+	public Map<String, String> authenticateUser(LoginRequest loginRequest) {
 		UsernamePasswordAuthenticationToken authRequest = new UsernamePasswordAuthenticationToken(
 				loginRequest.getEmail(), loginRequest.getPassword());
 		Authentication authentication = authenticationManager.authenticate(authRequest);
-		return jwtUtils.generateToken(authentication.getName());
+
+		User user = userRepository.findByEmail(loginRequest.getEmail())
+				.orElseThrow(() -> new BadCredentialsException("User not found"));
+
+		if (user.isBanned()) {
+			log.warn("LOG-05: Login rejected - User {} is banned", maskEmail(user.getEmail()));
+			throw new LockedException("Your account has been banned. Please contact support.");
+		}
+
+		String token = jwtUtils.generateToken(authentication.getName());
+
+		return Map.of(
+				"token", token,
+				"role", user.getRole().name()
+		);
 	}
 
 	public void logoutUser(String authHeader) {

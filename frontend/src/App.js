@@ -13,10 +13,13 @@ import Cart from './components/Cart';
 import authService from './services/authService';
 import AuthPage from './components/AuthPage';
 import { initInactivityTracking } from './utils/inactivityTimeout';
+import AdminPanel from './components/AdminPanel';
+import ShieldAlert from 'lucide-react';
 
 function AppContent() {
   const navigate = useNavigate();
   const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('token'));
+  const [userRole, setUserRole] = useState(localStorage.getItem('userRole') || '');
   const [cartItems, setCartItems] = useState([]);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
@@ -79,12 +82,15 @@ function AppContent() {
     await authService.logout();
     setIsAuthenticated(false);
     setCartItems([]);
+    setUserRole('');
+    localStorage.removeItem('userRole');
     triggerToast('Logged out successfully!');
     navigate('/login', { replace: true });
   };
 
   const handleLoginSuccess = () => {
     setIsAuthenticated(true);
+    setUserRole(localStorage.getItem('userRole') || '');
   };
 
   // Рахуємо кількість товарів для хедера
@@ -93,7 +99,12 @@ function AppContent() {
   return (
     <div className="App">
       {/* Передаємо cartCount у хедер, щоб він відображав цифру */}
-      <Header cartCount={cartCount} isAuthenticated={isAuthenticated} onLogout={handleLogout} />
+      <Header
+        cartCount={cartCount}
+        isAuthenticated={isAuthenticated}
+        userRole={userRole}
+        onLogout={handleLogout}
+      />
 
       {showToast && (
         <div className={`toast-notification toast-notification--${toastType}`}>{toastMessage}</div>
@@ -192,7 +203,19 @@ function AppContent() {
 
           {/* Замовлення */}
           <Route path="/orders" element={<OrdersPage />} />
-
+          <Route
+            path="/admin"
+            element={
+              isAuthenticated && userRole === 'ADMIN' ? (
+                <AdminPanel
+                  onShowSuccessToast={triggerToast}
+                  onShowErrorToast={triggerErrorToast}
+                />
+              ) : (
+                <Navigate to="/menu" replace />
+              )
+            }
+          />
           {/* Редірект з порожньої адреси на меню */}
           <Route path="/" element={<Navigate to="/menu" replace />} />
         </Routes>

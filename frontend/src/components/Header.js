@@ -1,13 +1,13 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Utensils, ShoppingCart, User, Heart as HeartIcon } from 'lucide-react';
+import { Utensils, ShoppingCart, User, Heart as HeartIcon, ShieldCheck } from 'lucide-react';
 import './Header.css';
 import { LogOut, LogIn } from 'lucide-react';
 
 /**
  * Header Component - Navigation and branding for Foodly
  */
-const Header = ({ cartCount, isAuthenticated, onLogout }) => {
+const Header = ({ cartCount, isAuthenticated, userRole, onLogout }) => {
   const location = useLocation();
   const getActiveClass = (path) => (location.pathname === path ? 'active' : '');
 
@@ -31,6 +31,12 @@ const Header = ({ cartCount, isAuthenticated, onLogout }) => {
           <Link to="/stats" className={`header__nav-link ${getActiveClass('/stats')}`}>
             Analytics
           </Link>
+          {isAuthenticated && userRole === 'ADMIN' && (
+            <Link to="/admin" className={`header__nav-link admin-link ${getActiveClass('/admin')}`}>
+              <ShieldCheck size={18} style={{ marginRight: '4px', verticalAlign: 'middle' }} />
+              Admin Panel
+            </Link>
+          )}
         </nav>
 
         {/* Right Icons */}
