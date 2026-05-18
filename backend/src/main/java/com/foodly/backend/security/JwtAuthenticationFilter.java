@@ -24,13 +24,14 @@ import java.util.ArrayList;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 	private final JwtUtils jwtUtils;
+	private final TokenBlacklistService blacklistService;
 
 	@Override
 	protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response,
-			@NonNull FilterChain filterChain) throws ServletException, IOException {
+	                                @NonNull FilterChain filterChain) throws ServletException, IOException {
 		try {
 			String jwt = parseJwt(request);
-			if (jwt != null && jwtUtils.validateToken(jwt)) {
+			if (jwt != null && !blacklistService.isBlacklisted(jwt) && jwtUtils.validateToken(jwt)) {
 				String email = jwtUtils.getEmailFromToken(jwt);
 
 				log.debug("LOG-06: JWT validated for user: {}", email);
@@ -39,6 +40,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 				authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 				SecurityContextHolder.getContext().setAuthentication(authentication);
+			}
+			else if (jwt != null && blacklistService.isBlacklisted(jwt)) {
+				log.warn("LOG-10: Access denied - token is blacklisted");
+				response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+				return;
 			}
 		}
 		catch (Exception e) {
@@ -59,5 +65,4 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		}
 		return null;
 	}
-
 }

@@ -5,6 +5,7 @@ import com.foodly.backend.dto.RegisterRequest;
 import com.foodly.backend.entity.Role;
 import com.foodly.backend.entity.User;
 import com.foodly.backend.repository.UserRepository;
+import com.foodly.backend.security.TokenBlacklistService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -25,6 +26,8 @@ public class UserService {
 	private final PasswordEncoder passwordEncoder;
 
 	private final AuthenticationManager authenticationManager;
+
+	private final TokenBlacklistService blacklistService;
 
 	private final JwtUtils jwtUtils;
 
@@ -56,6 +59,25 @@ public class UserService {
 				loginRequest.getEmail(), loginRequest.getPassword());
 		Authentication authentication = authenticationManager.authenticate(authRequest);
 		return jwtUtils.generateToken(authentication.getName());
+	}
+
+	public void logoutUser(String authHeader) {
+		if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+			throw new IllegalArgumentException("Authorization header missing or invalid");
+		}
+
+		String token = authHeader.substring(7).trim();
+
+		try {
+			long expirationTime = jwtUtils.getExpirationDateFromToken(token).getTime();
+
+			blacklistService.blacklistToken(token, expirationTime);
+
+			log.info("LOG-11: Token successfully added to blacklist for logout.");
+		} catch (Exception e) {
+			log.error("LOG-12: Error processing token during logout: {}", e.getMessage());
+			throw new RuntimeException("Failed to process token during logout", e);
+		}
 	}
 
 	private String maskEmail(String email) {

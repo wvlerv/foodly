@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import './App.css';
 import Header from './components/Header';
@@ -12,6 +12,7 @@ import NutritionChart from './components/NutritionChart';
 import Cart from './components/Cart';
 import authService from './services/authService';
 import AuthPage from './components/AuthPage';
+import { initInactivityTracking } from './utils/inactivityTimeout';
 
 function AppContent() {
   const navigate = useNavigate();
@@ -22,6 +23,12 @@ function AppContent() {
   const [toastType, setToastType] = useState('success'); // 'success' or 'error'
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
+  useEffect(() => {
+    if (isAuthenticated) {
+      initInactivityTracking();
+    }
+  }, [isAuthenticated]);
+  
   const triggerToast = (message) => {
     setToastMessage(message);
     setToastType('success');
@@ -67,11 +74,11 @@ function AppContent() {
     setShowLogoutConfirm(false);
   };
 
-  const handleConfirmLogout = () => {
+  const handleConfirmLogout = async () => {
     setShowLogoutConfirm(false);
-
-    authService.logout();
+    await authService.logout();
     setIsAuthenticated(false);
+    setCartItems([]);
     triggerToast('Logged out successfully!');
     navigate('/login', { replace: true });
   };

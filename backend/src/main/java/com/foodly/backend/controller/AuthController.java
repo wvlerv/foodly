@@ -51,6 +51,22 @@ public class AuthController {
 		}
 	}
 
+	@PostMapping("/logout")
+	public ResponseEntity<?> logout(@RequestHeader(value = "Authorization", required = false) String authHeader) {
+		log.info("LOG-10: Received logout request");
+
+		try {
+			userService.logoutUser(authHeader);
+			return ResponseEntity.ok(Map.of("message", "Logged out successfully"));
+		}
+		catch (IllegalArgumentException e) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", e.getMessage()));
+		}
+		catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("message", "An error occurred during logout"));
+		}
+	}
+
 	private String maskEmail(String email) {
 		if (email == null || !email.contains("@"))
 			return "****";

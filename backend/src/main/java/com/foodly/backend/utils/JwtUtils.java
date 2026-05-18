@@ -30,15 +30,24 @@ public class JwtUtils {
 
 	public String generateToken(String email) {
 		return Jwts.builder()
-			.subject(email)
-			.issuedAt(new Date())
-			.expiration(new Date((new Date()).getTime() + jwtExpirationMs))
-			.signWith(key)
-			.compact();
+				.subject(email)
+				.issuedAt(new Date())
+				.expiration(new Date((new Date()).getTime() + jwtExpirationMs))
+				.signWith(key)
+				.compact();
 	}
 
 	public String getEmailFromToken(String token) {
 		return Jwts.parser().verifyWith(key).build().parseSignedClaims(token).getPayload().getSubject();
+	}
+
+	public Date getExpirationDateFromToken(String token) {
+		return Jwts.parser()
+				.verifyWith(key)
+				.build()
+				.parseSignedClaims(token)
+				.getPayload()
+				.getExpiration();
 	}
 
 	public boolean validateToken(String token) {
@@ -63,5 +72,4 @@ public class JwtUtils {
 		}
 		return false;
 	}
-
 }
