@@ -1,6 +1,7 @@
 package com.foodly.backend.config;
 
 import com.foodly.backend.security.JwtAuthenticationFilter;
+import com.foodly.backend.security.CustomAccessDeniedHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,6 +27,7 @@ import java.util.Arrays;
 public class SecurityConfig {
 
 	private final JwtAuthenticationFilter jwtAuthFilter;
+	private final CustomAccessDeniedHandler customAccessDeniedHandler;
 
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -34,6 +36,10 @@ public class SecurityConfig {
 			.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 			.authorizeHttpRequests(auth -> auth.requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html")
 				.permitAll()
+				.requestMatchers("/actuator/prometheus", "/actuator/health", "/actuator/info")
+				.permitAll()
+				.requestMatchers("/actuator-test/admin-only")
+				.hasRole("ADMIN")
 				.requestMatchers("/api/auth/**")
 				.permitAll()
 				.requestMatchers("/api/dishes/**")
@@ -42,6 +48,7 @@ public class SecurityConfig {
 				.permitAll()
 				.anyRequest()
 				.authenticated())
+			.exceptionHandling(ex -> ex.accessDeniedHandler(customAccessDeniedHandler))
 			.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
 		return http.build();
