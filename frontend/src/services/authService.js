@@ -13,8 +13,15 @@ const authService = {
     return await api.post('/auth/register', { firstName, lastName, username, email, password });
   },
 
-  logout: () => {
-    localStorage.removeItem('token');
+  logout: async () => {
+    try {
+      await api.post('/auth/logout');
+      console.log('Successfully logged out from server-side blacklist.');
+    } catch (error) {
+      console.error('Server-side logout failed:', error.response?.data || error.message);
+    } finally {
+      localStorage.removeItem('token');
+    }
   },
 
   getCurrentToken: () => {
