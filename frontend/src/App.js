@@ -6,6 +6,7 @@ import Footer from './components/Footer';
 import MenuCatalog from './components/MenuCatalog';
 import OrdersPage from './components/OrdersPage';
 import CheckoutPage from './components/CheckoutPage';
+import UserProfile from './components/UserProfile';
 import mockDishes from './data/mockDishes.json';
 import NutritionChart from './components/NutritionChart';
 import Cart from './components/Cart';
@@ -19,6 +20,7 @@ function AppContent() {
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
   const [toastType, setToastType] = useState('success'); // 'success' or 'error'
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   const triggerToast = (message) => {
     setToastMessage(message);
@@ -58,6 +60,16 @@ function AppContent() {
   };
 
   const handleLogout = () => {
+    setShowLogoutConfirm(true);
+  };
+
+  const handleCancelLogout = () => {
+    setShowLogoutConfirm(false);
+  };
+
+  const handleConfirmLogout = () => {
+    setShowLogoutConfirm(false);
+
     authService.logout();
     setIsAuthenticated(false);
     triggerToast('Logged out successfully!');
@@ -78,6 +90,28 @@ function AppContent() {
 
       {showToast && (
         <div className={`toast-notification toast-notification--${toastType}`}>{toastMessage}</div>
+      )}
+
+      {showLogoutConfirm && (
+        <div className="logout-modal-overlay" role="presentation">
+          <div
+            className="logout-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="logout-confirm-title"
+          >
+            <h2 id="logout-confirm-title">Log out?</h2>
+            <p>Are you sure you want to log out from your account?</p>
+            <div className="logout-modal__actions">
+              <button type="button" className="logout-modal__cancel" onClick={handleCancelLogout}>
+                Cancel
+              </button>
+              <button type="button" className="logout-modal__confirm" onClick={handleConfirmLogout}>
+                Log out
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       <main className="App__main">
@@ -116,6 +150,13 @@ function AppContent() {
 
           {/* Сторінка аналітики (Твій графік) */}
           <Route path="/stats" element={<NutritionChart />} />
+
+          <Route
+            path="/profile"
+            element={
+              <UserProfile onShowSuccessToast={triggerToast} onShowErrorToast={triggerErrorToast} />
+            }
+          />
 
           {/* Кошик */}
           <Route

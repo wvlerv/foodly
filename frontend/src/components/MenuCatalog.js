@@ -5,6 +5,58 @@ import api from '../api/axios';
 import './MenuCatalog.css';
 import { CirclePlus } from 'lucide-react';
 
+const warningOverlayStyle = {
+  position: 'fixed',
+  inset: 0,
+  zIndex: 1000,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  backgroundColor: 'rgba(15, 23, 42, 0.65)',
+  padding: '16px',
+};
+
+const warningModalStyle = {
+  width: 'min(100%, 440px)',
+  borderRadius: '20px',
+  backgroundColor: '#ffffff',
+  padding: '24px',
+  boxShadow: '0 24px 80px rgba(0, 0, 0, 0.28)',
+  textAlign: 'center',
+};
+
+const warningModalActionsStyle = {
+  display: 'flex',
+  gap: '12px',
+  justifyContent: 'center',
+  marginTop: '24px',
+};
+
+const warningModalCancelStyle = {
+  border: '1px solid #d1d5db',
+  backgroundColor: '#ffffff',
+  color: '#111827',
+  borderRadius: '999px',
+  padding: '10px 16px',
+  fontWeight: 600,
+  cursor: 'pointer',
+};
+
+const warningModalConfirmStyle = {
+  border: 'none',
+  backgroundColor: '#dc2626',
+  color: '#ffffff',
+  borderRadius: '999px',
+  padding: '10px 16px',
+  fontWeight: 700,
+  cursor: 'pointer',
+};
+
+const normalizeAllergen = (value) =>
+  String(value ?? '')
+    .trim()
+    .toLowerCase();
+
 // Об'єднуємо всі пропси в один аргумент
 const MenuCatalog = ({
   dishes: mockDishes,
@@ -19,6 +71,8 @@ const MenuCatalog = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [favoriteIds, setFavoriteIds] = useState([]);
   const [selectedAllergens, setSelectedAllergens] = useState([]);
+  const [userAllergens, setUserAllergens] = useState([]);
+  const [warningDish, setWarningDish] = useState(null);
   const [loading, setLoading] = useState(true);
   const [, setError] = useState(null);
   const [availableAllergens, setAvailableAllergens] = useState([]);
@@ -59,6 +113,28 @@ const MenuCatalog = ({
     fetchFavorites();
   }, []);
 
+  useEffect(() => {
+    const fetchUserAllergens = async () => {
+      try {
+        const response = await api.get('/profile/me', {
+          headers: getAuthHeaders(),
+        });
+
+        const allergens = Array.isArray(response.data?.allergens) ? response.data.allergens : [];
+        setUserAllergens(
+          allergens
+            .filter((allergen) => allergen !== null && allergen !== undefined)
+            .map((allergen) => String(allergen).trim())
+            .filter((allergen) => allergen !== '' && allergen !== 'string')
+        );
+      } catch (err) {
+        setUserAllergens([]);
+      }
+    };
+
+    fetchUserAllergens();
+  }, []);
+
   const mapSortOptionToParams = (option) => {
     const mapping = {
       proteins: 'proteins',
@@ -67,6 +143,16 @@ const MenuCatalog = ({
       carbs: 'carbs',
     };
     return { sortBy: mapping[option] || null };
+  };
+
+  const getMatchedAllergens = (dishAllergens = []) => {
+    const userAllergenSet = new Set(userAllergens.map(normalizeAllergen).filter(Boolean));
+
+    return (Array.isArray(dishAllergens) ? dishAllergens : [])
+      .filter((allergen) => allergen !== null && allergen !== undefined)
+      .map((allergen) => String(allergen).trim())
+      .filter((allergen) => allergen !== '' && allergen !== 'string')
+      .filter((allergen) => userAllergenSet.has(normalizeAllergen(allergen)));
   };
 
   const collectAllergens = (dishList) => {
@@ -104,8 +190,33 @@ const MenuCatalog = ({
 
   const toggleAllergen = (allergen) => {
     setSelectedAllergens((prev) =>
-      prev.includes(allergen) ? prev.filter((a) => a !== allergen) : [...prev, allergen]
+      prev.includes(allergen) ? prev.filter((item) => item !== allergen) : [...prev, allergen]
     );
+  };
+
+  const handleAddToCart = (dish) => {
+    const matchedAllergens = getMatchedAllergens(dish.allergens);
+
+    if (matchedAllergens.length > 0) {
+      setWarningDish({
+        dish,
+        matchedAllergens,
+      });
+      return;
+    }
+
+    onAddToCart?.(dish);
+  };
+
+  const handleCancelWarning = () => {
+    setWarningDish(null);
+  };
+
+  const handleAddAnyway = () => {
+    if (warningDish?.dish) {
+      onAddToCart?.(warningDish.dish);
+    }
+    setWarningDish(null);
   };
 
   /**
@@ -162,11 +273,18 @@ const MenuCatalog = ({
     }
   };
 
-  // Фільтрація (Алергени -> Пошук -> Обране)
+  // Фільтрація: exclude allergens -> search -> favorites
   const visibleDishes = dishes
     .filter((dish) => {
       if (selectedAllergens.length === 0) return true;
-      return !dish.allergens?.some((a) => selectedAllergens.includes(a));
+      const dishAllergens = (Array.isArray(dish.allergens) ? dish.allergens : [])
+        .map((allergen) => normalizeAllergen(allergen))
+        .filter(Boolean);
+      const excludedAllergens = new Set(
+        selectedAllergens.map((allergen) => normalizeAllergen(allergen))
+      );
+
+      return !dishAllergens.some((allergen) => excludedAllergens.has(allergen));
     })
     .filter((dish) => dish.name.toLowerCase().includes(searchQuery.toLowerCase()))
     .filter((dish) => (showFavoritesOnly ? favoriteIds.includes(dish.id) : true));
@@ -241,13 +359,15 @@ const MenuCatalog = ({
         ) : visibleDishes.length > 0 ? (
           <div className="menu-catalog__grid">
             {visibleDishes.map((dish) => (
-              <DishCard
-                key={dish.id}
-                dish={dish}
-                onAddToCart={onAddToCart} // Передаємо функцію кошика
-                isFavorite={favoriteIds.includes(dish.id)} // Передаємо статус серця
-                onToggleFavorite={toggleFavorite} // Передаємо функцію кліку по серцю
-              />
+              <div key={dish.id}>
+                <DishCard
+                  dish={dish}
+                  onAddToCart={handleAddToCart}
+                  isFavorite={favoriteIds.includes(dish.id)}
+                  onToggleFavorite={toggleFavorite}
+                  matchedAllergens={getMatchedAllergens(dish.allergens)}
+                />
+              </div>
             ))}
           </div>
         ) : (
@@ -268,6 +388,36 @@ const MenuCatalog = ({
           </div>
         )}
       </div>
+
+      {warningDish && (
+        <div
+          className="menu-catalog__warning-modal"
+          role="presentation"
+          style={warningOverlayStyle}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="allergen-warning-title"
+            style={warningModalStyle}
+          >
+            <h2 id="allergen-warning-title">Allergen warning</h2>
+            <p>
+              This dish contains {warningDish.matchedAllergens.join(', ')}. Are you sure you want to
+              add it?
+            </p>
+
+            <div style={warningModalActionsStyle}>
+              <button type="button" onClick={handleCancelWarning} style={warningModalCancelStyle}>
+                Cancel
+              </button>
+              <button type="button" onClick={handleAddAnyway} style={warningModalConfirmStyle}>
+                Add Anyway
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -3,7 +3,7 @@
 /* Оновлена синя кнопка та акцент на ціні */
 
 .dish-card__price {
-  color: #2563eb; /* Змінюємо ціну на синю, щоб вона пасувала до кнопки */
+  color: #00b894; /* Змінюємо ціну на зелену, щоб вона пасувала до кнопки */
   font-size: 1.4rem;
 }
 
@@ -25,9 +25,9 @@
 }
 
 .dish-card__add-btn:hover:not(:disabled) {
-  background: #3b82f6; /* Гарний синій колір при наведенні */
+  background: #00b894; /* Гарний зелений колір при наведенні */
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); /* Синя тінь */
+  box-shadow: 0 4px 12px rgba(0, 184, 148, 0.3); /* Зелена тінь */
 }
 
 .dish-card__add-btn:active:not(:disabled) {
@@ -101,20 +101,6 @@
   font-weight: 600;
 }
 
-.dish-card__allergen-alert {
-  position: absolute;
-  top: 12px;
-  left: 12px;
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: help;
-  padding: 4px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-}
-
 /* Favorite Button Styles */
 .dish-card__favorite-btn {
   position: absolute;
@@ -159,10 +145,47 @@
   letter-spacing: -0.02em;
 }
 
+.dish-card__title-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.dish-card__title-wrapper .dish-card__name {
+  margin-bottom: 0;
+}
+
+.dish-card__title-warning {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: #dc2626;
+  cursor: help;
+}
+
+.dish-card__title-warning-mark {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1;
+  transform: translateY(-1px);
+  pointer-events: none;
+}
+
 .dish-card__description {
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   overflow: hidden;
   min-height: 3em;
   margin: 0 0 9px 0; /* більше простору між описом і ціною */

@@ -6,6 +6,9 @@ import './AuthPage.css';
 const AuthPage = ({ onLoginSuccess, onShowErrorToast }) => {
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    username: '',
     email: '',
     password: '',
     confirmPassword: '',
@@ -19,6 +22,21 @@ const AuthPage = ({ onLoginSuccess, onShowErrorToast }) => {
   const validate = () => {
     const newErrors = {};
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!isLogin) {
+      if (!formData.firstName.trim()) {
+        newErrors.firstName = 'First name is required';
+      }
+
+      if (!formData.lastName.trim()) {
+        newErrors.lastName = 'Last name is required';
+      }
+
+      if (!formData.username.trim()) {
+        newErrors.username = 'Username is required';
+      }
+    }
+
     if (!formData.email) {
       newErrors.email = 'Email is required';
     } else if (!emailRegex.test(formData.email)) {
@@ -62,10 +80,23 @@ const AuthPage = ({ onLoginSuccess, onShowErrorToast }) => {
         onLoginSuccess();
         navigate('/menu');
       } else {
-        await authService.register(formData.email, formData.password);
+        await authService.register({
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          username: formData.username,
+          email: formData.email,
+          password: formData.password,
+        });
         setServerError('');
         setIsLogin(true);
-        setFormData((prev) => ({ ...prev, password: '', confirmPassword: '' }));
+        setFormData((prev) => ({
+          ...prev,
+          firstName: '',
+          lastName: '',
+          username: '',
+          password: '',
+          confirmPassword: '',
+        }));
       }
     } catch (err) {
       const backendMessage = err.response?.data?.message || err.response?.data;
@@ -89,7 +120,14 @@ const AuthPage = ({ onLoginSuccess, onShowErrorToast }) => {
     setIsLogin(!isLogin);
     setErrors({});
     setServerError('');
-    setFormData({ email: '', password: '', confirmPassword: '' });
+    setFormData({
+      firstName: '',
+      lastName: '',
+      username: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
+    });
   };
 
   return (
@@ -105,6 +143,51 @@ const AuthPage = ({ onLoginSuccess, onShowErrorToast }) => {
         {serverError && <div className="auth-error-banner">{serverError}</div>}
 
         <form onSubmit={handleSubmit} className="auth-form" noValidate>
+          {!isLogin && (
+            <div className="auth-name-grid">
+              <div className="form-group">
+                <label>First Name</label>
+                <input
+                  name="firstName"
+                  type="text"
+                  value={formData.firstName}
+                  onChange={handleChange}
+                  placeholder="John"
+                  className={errors.firstName ? 'input-error' : ''}
+                />
+                {errors.firstName && <span className="error-text">{errors.firstName}</span>}
+              </div>
+
+              <div className="form-group">
+                <label>Last Name</label>
+                <input
+                  name="lastName"
+                  type="text"
+                  value={formData.lastName}
+                  onChange={handleChange}
+                  placeholder="Doe"
+                  className={errors.lastName ? 'input-error' : ''}
+                />
+                {errors.lastName && <span className="error-text">{errors.lastName}</span>}
+              </div>
+            </div>
+          )}
+
+          {!isLogin && (
+            <div className="form-group">
+              <label>Username</label>
+              <input
+                name="username"
+                type="text"
+                value={formData.username}
+                onChange={handleChange}
+                placeholder="john_doe"
+                className={errors.username ? 'input-error' : ''}
+              />
+              {errors.username && <span className="error-text">{errors.username}</span>}
+            </div>
+          )}
+
           <div className="form-group">
             <label>Email Address</label>
             <input

@@ -1,6 +1,7 @@
 package com.foodly.backend.controller;
 
 import com.foodly.backend.dto.HealthProfileDto;
+import com.foodly.backend.dto.UserProfileDto;
 import com.foodly.backend.entity.Dish;
 import com.foodly.backend.entity.HealthProfile;
 import com.foodly.backend.service.ProfileService;
@@ -35,8 +36,23 @@ public class ProfileController {
 
 	@GetMapping("/me")
 	public ResponseEntity<?> getMyProfile(Authentication authentication) {
-		log.info("Fetching profile for: {}", authentication.getName());
-		return ResponseEntity.ok(profileService.getProfileByEmail(authentication.getName()));
+		if (authentication == null || !authentication.isAuthenticated()) {
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+		}
+
+		try {
+			log.info("Fetching profile for: {}", authentication.getName());
+			return ResponseEntity.ok(profileService.getProfileByEmail(authentication.getName()));
+		}
+		catch (RuntimeException e) {
+			if (e.getMessage() != null && e.getMessage().contains("User not found")) {
+				return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", e.getMessage()));
+			}
+
+			log.error("Error fetching profile: {}", e.getMessage(), e);
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+				.body(Map.of("error", "Could not load profile"));
+		}
 	}
 
 	/**

@@ -9,8 +9,8 @@ const authService = {
     return response.data;
   },
 
-  register: async (email, password) => {
-    return await api.post('/auth/register', { email, password });
+  register: async ({ firstName, lastName, username, email, password }) => {
+    return await api.post('/auth/register', { firstName, lastName, username, email, password });
   },
 
   logout: () => {
