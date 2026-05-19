@@ -35,7 +35,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 	@Override
 	protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response,
-			@NonNull FilterChain filterChain) throws ServletException, IOException {
+	                                @NonNull FilterChain filterChain) throws ServletException, IOException {
 		try {
 			String jwt = parseJwt(request);
 			if (jwt != null && !blacklistService.isBlacklisted(jwt) && jwtUtils.validateToken(jwt)) {
@@ -47,18 +47,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 					User user = userOptional.get();
 
 					if (user.isBanned()) {
-						log.warn("LOG-09: Access denied - User {} is banned", email);
+						log.warn("LOG-09: Access denied - User {} is banned", maskEmail(email));
 						response.setStatus(HttpServletResponse.SC_FORBIDDEN);
 						response.setContentType("application/json");
 						response.getWriter().write("{\"message\": \"Your account has been banned.\"}");
 						return;
 					}
-
-					log.debug("LOG-06: JWT validated for user: {}", email);
+					log.debug("LOG-06: JWT validated for user: {}", maskEmail(email));
 					String roleWithPrefix = "ROLE_" + user.getRole().name();
 					List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(roleWithPrefix));
-					UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(email,
-							null, authorities);
+					UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+							email, null, authorities);
 
 					authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 					SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -81,12 +80,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		if (StringUtils.hasText(headerAuth) && headerAuth.startsWith("Bearer ")) {
 			String jwt = headerAuth.substring(7).trim();
 			if (jwt.chars().filter(ch -> ch == '.').count() != 2) {
-				log.warn("LOG-08: Malformed JWT received: {}", jwt);
+				log.warn("LOG-08: Malformed JWT received. String length: {}", jwt.length());
 				return null;
 			}
 			return jwt;
 		}
 		return null;
+	}
+
+	private String maskEmail(String email) {
+		if (email == null || !email.contains("@"))
+			return "****";
+		return email.replaceAll("(^.{2}).*(@.*$)", "$1***$2");
 	}
 
 }
