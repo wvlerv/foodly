@@ -4,10 +4,12 @@ import com.foodly.backend.dto.LoginRequest;
 import com.foodly.backend.dto.RegisterRequest;
 import com.foodly.backend.entity.Role;
 import com.foodly.backend.entity.User;
+import com.foodly.backend.dto.ChangePasswordRequest;
 import com.foodly.backend.repository.UserRepository;
 import com.foodly.backend.security.TokenBlacklistService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -17,6 +19,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.authentication.LockedException;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Map;
 
@@ -61,7 +64,6 @@ public class UserService {
 	public Map<String, String> authenticateUser(LoginRequest loginRequest) {
 		User user = userRepository.findByEmail(loginRequest.getEmail())
 			.orElseThrow(() -> new BadCredentialsException("Invalid email or password"));
-
 		if (user.isBanned()) {
 			log.warn("LOG-05: Login rejected - User {} is banned", maskEmail(user.getEmail()));
 			throw new LockedException("Your account has been banned. Please contact support.");
@@ -94,6 +96,37 @@ public class UserService {
 			log.error("LOG-12: Error processing token during logout: {}", e.getMessage());
 			throw new RuntimeException("Failed to process token during logout", e);
 		}
+	}
+
+	@Transactional
+	public void changePassword(String email, ChangePasswordRequest request) {
+		User user = userRepository.findByEmail(email)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+		if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
+			log.warn("Password change failed for {} - incorrect old password", maskEmail(email));
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Incorrect old password");
+		}
+
+		if (request.getNewPassword() == null || request.getNewPassword().length() < 6) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "New password must be at least 6 characters long");
+		}
+
+		user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+		userRepository.save(user);
+		log.info("Password successfully updated for user ID: {}", user.getId());
+	}
+
+	@Transactional
+	public void softDeleteUser(String email) {
+		User user = userRepository.findByEmail(email)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+		user.setDeleted(true);
+		user.setEmail("deleted_" + user.getId() + "_" + user.getEmail());
+
+		userRepository.save(user);
+		log.info("User ID: {} has been soft-deleted and anonymized", user.getId());
 	}
 
 	private String maskEmail(String email) {

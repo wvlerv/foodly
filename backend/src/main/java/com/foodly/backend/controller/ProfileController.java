@@ -1,10 +1,12 @@
 package com.foodly.backend.controller;
 
+import com.foodly.backend.dto.ChangePasswordRequest;
 import com.foodly.backend.dto.HealthProfileDto;
 import com.foodly.backend.dto.UserProfileDto;
 import com.foodly.backend.entity.Dish;
 import com.foodly.backend.entity.HealthProfile;
 import com.foodly.backend.service.ProfileService;
+import com.foodly.backend.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -25,6 +27,7 @@ import java.util.UUID;
 public class ProfileController {
 
 	private final ProfileService profileService;
+	private final UserService userService;
 
 	@PostMapping("/update")
 	public ResponseEntity<?> updateProfile(@RequestBody HealthProfileDto dto, Authentication authentication) {
@@ -53,6 +56,27 @@ public class ProfileController {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 				.body(Map.of("error", "Could not load profile"));
 		}
+	}
+
+	@PostMapping("/change-password")
+	public ResponseEntity<?> changePassword(@RequestBody ChangePasswordRequest request, Authentication authentication) {
+		if (authentication == null || !authentication.isAuthenticated()) {
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Not authenticated");
+		}
+
+		userService.changePassword(authentication.getName(), request);
+		return ResponseEntity.ok(Map.of("message", "Password updated successfully"));
+	}
+
+	@DeleteMapping("/delete")
+	public ResponseEntity<?> deleteAccount(Authentication authentication) {
+		if (authentication == null || !authentication.isAuthenticated()) {
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Not authenticated");
+		}
+
+		log.info("Profile delete requested for user: {}", authentication.getName());
+		userService.softDeleteUser(authentication.getName());
+		return ResponseEntity.ok(Map.of("message", "Account successfully deleted"));
 	}
 
 	/**
