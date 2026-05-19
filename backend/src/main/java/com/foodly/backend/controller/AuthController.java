@@ -50,15 +50,15 @@ public class AuthController {
 			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message", e.getMessage()));
 		}
 		catch (Exception e) {
-			log.error("Unexpected error during login", e);
+			log.error("LOG-14: Unexpected error during login: {}", e.getMessage());
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-				.body(Map.of("message", "An unexpected error occurred"));
+					.body(Map.of("message", "An unexpected error occurred"));
 		}
 	}
 
 	@PostMapping("/logout")
 	public ResponseEntity<?> logout(@RequestHeader(value = "Authorization", required = false) String authHeader) {
-		log.info("LOG-10: Received logout request");
+		log.info("LOG-13: Received logout request");
 
 		try {
 			userService.logoutUser(authHeader);
@@ -68,8 +68,9 @@ public class AuthController {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", e.getMessage()));
 		}
 		catch (Exception e) {
+			log.error("Unexpected error during logout processing: {}", e.getMessage());
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-				.body(Map.of("message", "An error occurred during logout"));
+					.body(Map.of("message", "An error occurred during logout"));
 		}
 	}
 
