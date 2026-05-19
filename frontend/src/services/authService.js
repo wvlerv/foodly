@@ -7,7 +7,7 @@ const authService = {
       localStorage.setItem('token', response.data.token);
     }
     if (response.data.role) {
-      localStorage.setItem('userRole', response.data.role); 
+      localStorage.setItem('userRole', response.data.role);
     }
     return response.data;
   },

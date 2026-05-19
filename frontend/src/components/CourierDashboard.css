@@ -1,0 +1,132 @@
+.courier-panel {
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.courier-panel__header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 2rem;
+  color: #2c3e50;
+}
+
+.courier-icon {
+  color: #2ecc71;
+}
+
+.courier-panel__table-wrapper {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  overflow-x: auto;
+}
+
+.courier-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  table-layout: auto;
+}
+
+.courier-table th,
+.courier-table td {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #f1f2f6;
+}
+
+.courier-table th {
+  background-color: #f8f9fa;
+  color: #7f8c8d;
+  font-weight: 600;
+}
+
+.order-id-cell {
+  font-family: monospace;
+  font-weight: bold;
+  color: #34495e;
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.customer-cell {
+  font-weight: 500;
+  color: #2c3e50;
+}
+
+.price-cell {
+  font-weight: 600;
+  color: #2c3e50;
+  min-width: 90px;
+  white-space: nowrap;
+}
+
+.order-items-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 14px;
+  color: #555;
+  max-width: 300px;
+}
+
+.order-item-line {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.btn-deliver {
+  background-color: #e3fcef;
+  color: #0e6245;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+
+.btn-deliver:hover {
+  background-color: #c6f6d5;
+}
+
+.courier-loading,
+.courier-empty {
+  text-align: center;
+  padding: 4rem 2rem;
+  font-size: 18px;
+  color: #7f8c8d;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.empty-icon {
+  color: #bdc3c7;
+  margin-bottom: 1rem;
+}
+
+.order-date-time {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.order-date {
+  font-weight: 500;
+  color: #2c3e50;
+  font-size: 14px;
+}
+
+.order-time {
+  color: #2c3e50;
+  font-size: 14px;
+  font-family: monospace;
+}
