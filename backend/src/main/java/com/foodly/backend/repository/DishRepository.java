@@ -53,16 +53,17 @@ public interface DishRepository extends JpaRepository<Dish, UUID> {
 	List<String> findDistinctAllergens();
 
 	@Query("""
-      SELECT d FROM Dish d
-      ORDER BY
-          CASE WHEN :sortBy = 'proteins' THEN d.proteins END DESC,
-          CASE WHEN :sortBy = 'calories' THEN d.calories END ASC,
-          CASE WHEN :sortBy = 'fats' THEN d.fats END ASC,
-          CASE WHEN :sortBy = 'carbs' THEN d.carbohydrates END ASC,
-          d.name ASC
-      """)
+			SELECT d FROM Dish d
+			ORDER BY
+			    CASE WHEN :sortBy = 'proteins' THEN d.proteins END DESC,
+			    CASE WHEN :sortBy = 'calories' THEN d.calories END ASC,
+			    CASE WHEN :sortBy = 'fats' THEN d.fats END ASC,
+			    CASE WHEN :sortBy = 'carbs' THEN d.carbohydrates END ASC,
+			    d.name ASC
+			""")
 	List<Dish> findAllSortedForAdmin(@Param("sortBy") String sortBy);
 
 	@Query("SELECT d FROM Dish d ORDER BY d.name ASC")
 	List<Dish> findAllForAdmin();
+
 }

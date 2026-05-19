@@ -1,4 +1,9 @@
-import { formatCalories, filterMealsByLimit } from '../nutritionUtils';
+import {
+  formatCalories,
+  filterMealsByLimit,
+  calculateRemainingCalories,
+  getCaloriesTotal,
+} from '../nutritionUtils';
 
 describe('Nutrition Utilities', () => {
   test('Тест №4: Округлення калорій за правилами Math.round', () => {
@@ -17,5 +22,24 @@ describe('Nutrition Utilities', () => {
 
     expect(result).toHaveLength(1);
     expect(result[0].name).toBe('Salad');
+  });
+
+  test('Тест №6: Розрахунок залишку калорій для Fit my day', () => {
+    expect(
+      calculateRemainingCalories({
+        dailyCalorieIntake: 2000,
+        deliveredCalories: 250,
+        cartCalories: 300,
+      })
+    ).toBe(1450);
+  });
+
+  test('Тест №7: Підсумок калорій у кошику', () => {
+    const items = [
+      { calories: 200, quantity: 2 },
+      { calories: 150, quantity: 1 },
+    ];
+
+    expect(getCaloriesTotal(items)).toBe(550);
   });
 });

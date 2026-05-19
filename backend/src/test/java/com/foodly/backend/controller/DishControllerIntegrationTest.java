@@ -139,14 +139,19 @@ class DishControllerIntegrationTest {
     }
 
 	/**
-	 * Test: Verify that invalid remainingKcal returns empty list. Expected: Passing
-	 * remainingKcal=0 or negative values should return an empty array.
+	 * Test: Verify that invalid remainingKcal falls back to the lightest dishes.
+	 * Expected: Passing remainingKcal=0 should return all available dishes sorted by calories.
 	 */
 	@Test
 	void testFitMyDayFilterWithInvalidRemainingKcal() throws Exception {
+		when(dishRepository.findAllAvailableSorted("calories")).thenReturn(Arrays.asList(dish1, dish2, dish3));
+
 		mockMvc.perform(get("/api/dishes").param("remainingKcal", "0"))
 			.andExpect(status().isOk())
-			.andExpect(jsonPath("$", hasSize(0)));
+			.andExpect(jsonPath("$", hasSize(3)))
+			.andExpect(jsonPath("$[0].name", is("Grilled Chicken")))
+			.andExpect(jsonPath("$[1].name", is("Caesar Salad")))
+			.andExpect(jsonPath("$[2].name", is("Chocolate Cake")));
 	}
 
 	/**

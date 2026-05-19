@@ -13,15 +13,20 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class NutritionAnalyticsResponse {
 
-    private BigDecimal dailyGoal;
-    private List<CalorieLogDto> logs;
+	private BigDecimal dailyGoal;
 
-    @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class CalorieLogDto {
-        private String date;
-        private int consumedCalories;
-    }
+	private List<CalorieLogDto> logs;
+
+	@Data
+	@Builder
+	@NoArgsConstructor
+	@AllArgsConstructor
+	public static class CalorieLogDto {
+
+		private String date;
+
+		private int consumedCalories;
+
+	}
+
 }

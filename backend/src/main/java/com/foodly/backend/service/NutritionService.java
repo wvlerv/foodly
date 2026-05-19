@@ -27,7 +27,9 @@ import com.foodly.backend.dto.NutritionAnalyticsResponse;
  */
 @Service
 public class NutritionService {
+
 	private final UserRepository userRepository;
+
 	private final OrderRepository orderRepository;
 
 	public NutritionService(UserRepository userRepository, OrderRepository orderRepository) {
@@ -67,10 +69,11 @@ public class NutritionService {
 	public NutritionAnalyticsResponse getUserAnalytics(String email) {
 		// 1. Ищем пользователя и его медицинский профиль
 		User user = userRepository.findByEmail(email)
-				.orElseThrow(() -> new RuntimeException("User not found: " + email));
+			.orElseThrow(() -> new RuntimeException("User not found: " + email));
 
 		// 2. Считаем персональную норму калорий (DCI)
-		BigDecimal dailyGoal = BigDecimal.valueOf(2000); // Дефолт, если анкеты здоровья нет
+		BigDecimal dailyGoal = BigDecimal.valueOf(2000); // Дефолт, если анкеты здоровья
+															// нет
 		if (user.getHealthProfile() != null) {
 			dailyGoal = calculateFullDci(user.getHealthProfile());
 		}
@@ -80,14 +83,17 @@ public class NutritionService {
 
 		// 4. Группируем калории по датам (СТРОГО для доставленных заказов)
 		Map<String, Integer> caloriesByDate = new TreeMap<>();
-		boolean hasDeliveredOrders = false; // Флаг: есть ли хотя бы один доставленный заказ
+		boolean hasDeliveredOrders = false; // Флаг: есть ли хотя бы один доставленный
+											// заказ
 
 		for (Order order : userOrders) {
-			// КРИТИЧЕСКОЕ ИСПРАВЛЕНИЕ: Берем только те заказы, которые реально доставлены клиенту
+			// КРИТИЧЕСКОЕ ИСПРАВЛЕНИЕ: Берем только те заказы, которые реально доставлены
+			// клиенту
 			if (order.getStatus() == OrderStatus.DELIVERED) {
 				hasDeliveredOrders = true;
 
-				String dateKey = order.getCreatedAt().toLocalDate().toString(); // Формат "YYYY-MM-DD"
+				String dateKey = order.getCreatedAt().toLocalDate().toString(); // Формат
+																				// "YYYY-MM-DD"
 
 				int orderCalories = 0;
 				for (OrderItem item : order.getItems()) {
@@ -105,20 +111,18 @@ public class NutritionService {
 		List<NutritionAnalyticsResponse.CalorieLogDto> logDtos = new ArrayList<>();
 
 		// Если доставленных заказов нет, оставляем список logDtos ПУСТЫМ.
-		// Фронтенд увидит, что logs.length === 0, и безопасно переключится на MOCK_FALLBACK_DATA
+		// Фронтенд увидит, что logs.length === 0, и безопасно переключится на
+		// MOCK_FALLBACK_DATA
 		if (hasDeliveredOrders) {
 			for (Map.Entry<String, Integer> entry : caloriesByDate.entrySet()) {
 				logDtos.add(NutritionAnalyticsResponse.CalorieLogDto.builder()
-						.date(entry.getKey())
-						.consumedCalories(entry.getValue())
-						.build());
+					.date(entry.getKey())
+					.consumedCalories(entry.getValue())
+					.build());
 			}
 		}
 
-		return NutritionAnalyticsResponse.builder()
-				.dailyGoal(dailyGoal)
-				.logs(logDtos)
-				.build();
+		return NutritionAnalyticsResponse.builder().dailyGoal(dailyGoal).logs(logDtos).build();
 	}
 
 	public BigDecimal calculateFullDci(HealthProfile profile) {
@@ -148,4 +152,5 @@ public class NutritionService {
 			return bmr.subtract(new BigDecimal("161"));
 		}
 	}
+
 }

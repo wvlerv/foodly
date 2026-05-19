@@ -48,14 +48,11 @@ public class DishService {
 		List<String> allowedSorts = List.of("proteins", "calories", "fats", "carbs");
 
 		if (sortBy != null && allowedSorts.contains(sortBy.toLowerCase())) {
-			dishes = isManagerOrAdmin
-					? dishRepository.findAllSortedForAdmin(sortBy.toLowerCase())
+			dishes = isManagerOrAdmin ? dishRepository.findAllSortedForAdmin(sortBy.toLowerCase())
 					: dishRepository.findAllAvailableSorted(sortBy.toLowerCase());
 		}
 		else {
-			dishes = isManagerOrAdmin
-					? dishRepository.findAllForAdmin()
-					: dishRepository.findAllAvailable();
+			dishes = isManagerOrAdmin ? dishRepository.findAllForAdmin() : dishRepository.findAllAvailable();
 		}
 
 		logger.info("Catalog loaded: {} dishes (Admin mode: {})", dishes.size(), isManagerOrAdmin);
@@ -90,6 +87,16 @@ public class DishService {
 			return dishes.stream().map(DishResponseDto::from).collect(Collectors.toList());
 		}
 
+		if (remainingKcal.compareTo(BigDecimal.ZERO) <= 0) {
+			List<Dish> lightestDishes = dishRepository.findAllAvailableSorted("calories");
+			List<DishResponseDto> response = lightestDishes.stream()
+				.map(DishResponseDto::from)
+				.collect(Collectors.toList());
+
+			logger.info("'Fit my day' fallback applied: returning lightest dishes for limit {}", remainingKcal);
+			return response;
+		}
+
 		List<DishResponseDto> filtered = dishes.stream().filter(dish -> {
 			if (dish.getCalories() == null)
 				return false;
@@ -105,8 +112,9 @@ public class DishService {
 	@Transactional
 	public void toggleAvailability(UUID dishId, boolean available) {
 		Dish dish = dishRepository.findById(dishId)
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Dish not found"));
+			.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Dish not found"));
 
 		dish.setAvailable(available);
 	}
+
 }

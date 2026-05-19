@@ -16,8 +16,8 @@ public class ActiveSessionService {
 
 	public ActiveSessionService(MeterRegistry registry) {
 		this.registry = registry;
-        getOrCreateCounter("CLIENT");
-        getOrCreateCounter("ADMIN");
+		getOrCreateCounter("CLIENT");
+		getOrCreateCounter("ADMIN");
 	}
 
 	public void increment(String role) {

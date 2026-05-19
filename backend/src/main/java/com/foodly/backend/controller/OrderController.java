@@ -69,7 +69,8 @@ public class OrderController {
 
 	@PutMapping("/{orderId}/deliver")
 	@org.springframework.security.access.prepost.PreAuthorize("hasRole('COURIER')")
-	public ResponseEntity<?> deliverOrder(@org.springframework.web.bind.annotation.PathVariable java.util.UUID orderId, Authentication authentication) {
+	public ResponseEntity<?> deliverOrder(@org.springframework.web.bind.annotation.PathVariable java.util.UUID orderId,
+			Authentication authentication) {
 		logger.info("PUT /api/orders/{}/deliver called", orderId);
 		try {
 			if (authentication == null || !authentication.isAuthenticated()) {
@@ -82,7 +83,8 @@ public class OrderController {
 		}
 		catch (Exception e) {
 			logger.error("Failed to complete order delivery", e);
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to deliver order: " + e.getMessage());
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+				.body("Failed to deliver order: " + e.getMessage());
 		}
 	}
 

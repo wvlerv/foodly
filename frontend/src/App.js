@@ -16,12 +16,65 @@ import { initInactivityTracking } from './utils/inactivityTimeout';
 import AdminPanel from './components/AdminPanel';
 import ShieldAlert from 'lucide-react';
 import CourierDashboard from './components/CourierDashboard';
+import api from './api/axios';
+import { getNutritionLogs } from './services/nutritionService';
+
+const DEFAULT_NUTRITION_SUMMARY = {
+  dailyCalorieIntake: 2000,
+  deliveredCalories: 0,
+};
+
+const extractDeliveredCalories = (logs = []) => {
+  return logs.reduce((sum, entry) => sum + Number(entry?.consumedCalories || 0), 0);
+};
+
+const loadNutritionSummary = async (authenticated, setNutritionSummary) => {
+  if (!authenticated) {
+    setNutritionSummary(DEFAULT_NUTRITION_SUMMARY);
+    return;
+  }
+
+  const token = localStorage.getItem('token');
+
+  try {
+    const [profileResult, nutritionResult] = await Promise.allSettled([
+      api.get('/profile/me', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }),
+      getNutritionLogs(),
+    ]);
+
+    const profileGoal =
+      profileResult.status === 'fulfilled'
+        ? Number(
+            profileResult.value.data?.dailyCalorieIntake ??
+              profileResult.value.data?.dailyCalories ??
+              2000
+          )
+        : 2000;
+
+    const deliveredCalories =
+      nutritionResult.status === 'fulfilled'
+        ? extractDeliveredCalories(nutritionResult.value.data?.logs || [])
+        : 0;
+
+    setNutritionSummary({
+      dailyCalorieIntake: Number.isFinite(profileGoal) && profileGoal > 0 ? profileGoal : 2000,
+      deliveredCalories: Number.isFinite(deliveredCalories) ? deliveredCalories : 0,
+    });
+  } catch (error) {
+    setNutritionSummary(DEFAULT_NUTRITION_SUMMARY);
+  }
+};
 
 function AppContent() {
   const navigate = useNavigate();
   const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('token'));
   const [userRole, setUserRole] = useState(localStorage.getItem('userRole') || '');
   const [cartItems, setCartItems] = useState([]);
+  const [nutritionSummary, setNutritionSummary] = useState(DEFAULT_NUTRITION_SUMMARY);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
   const [toastType, setToastType] = useState('success'); // 'success' or 'error'
@@ -32,6 +85,12 @@ function AppContent() {
       initInactivityTracking();
     }
   }, [isAuthenticated]);
+
+  useEffect(() => {
+    loadNutritionSummary(isAuthenticated, setNutritionSummary);
+  }, [isAuthenticated]);
+
+  const refreshNutritionSummary = () => loadNutritionSummary(isAuthenticated, setNutritionSummary);
 
   const triggerToast = (message) => {
     setToastMessage(message);
@@ -157,6 +216,8 @@ function AppContent() {
                   dishes={mockDishes}
                   onAddToCart={addToCart}
                   onShowErrorToast={triggerErrorToast}
+                  cartItems={cartItems}
+                  nutritionSummary={nutritionSummary}
                 />
               )
             }
@@ -178,6 +239,8 @@ function AppContent() {
                 onAddToCart={addToCart}
                 showFavoritesOnly={true}
                 onShowErrorToast={triggerErrorToast}
+                cartItems={cartItems}
+                nutritionSummary={nutritionSummary}
               />
             }
           />
@@ -188,7 +251,11 @@ function AppContent() {
           <Route
             path="/profile"
             element={
-              <UserProfile onShowSuccessToast={triggerToast} onShowErrorToast={triggerErrorToast} />
+              <UserProfile
+                onShowSuccessToast={triggerToast}
+                onShowErrorToast={triggerErrorToast}
+                onProfileUpdated={refreshNutritionSummary}
+              />
             }
           />
 

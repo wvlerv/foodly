@@ -43,4 +43,5 @@ public class OrderResponseDto implements Serializable {
 	private List<com.foodly.backend.dto.OrderItemDto> items;
 
 	private String clientName;
+
 }

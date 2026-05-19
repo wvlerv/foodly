@@ -97,7 +97,7 @@ public class OrderService {
 	public List<OrderResponseDto> getAvailableOrdersForCouriers() {
 		// Кур'єр бачить абсолютно всі замовлення, які щойно створені клієнтами
 		List<Order> availableOrders = orderRepository
-				.findByStatusAndCourierIsNullOrderByCreatedAtDesc(com.foodly.backend.entity.OrderStatus.CREATED);
+			.findByStatusAndCourierIsNullOrderByCreatedAtDesc(com.foodly.backend.entity.OrderStatus.CREATED);
 
 		logger.info("Loaded {} new orders for the courier", availableOrders.size());
 		return availableOrders.stream().map(this::toDto).collect(Collectors.toList());
@@ -107,11 +107,11 @@ public class OrderService {
 	public OrderResponseDto completeOrder(UUID orderId, String courierEmail) {
 		// Шукаємо замовлення в базі
 		Order order = orderRepository.findById(orderId)
-				.orElseThrow(() -> new RuntimeException("Order not found with id: " + orderId));
+			.orElseThrow(() -> new RuntimeException("Order not found with id: " + orderId));
 
 		// Шукаємо нашого єдиного кур'єра
 		User courier = userRepository.findByEmail(courierEmail)
-				.orElseThrow(() -> new RuntimeException("Courier not found: " + courierEmail));
+			.orElseThrow(() -> new RuntimeException("Courier not found: " + courierEmail));
 
 		// Прямо міняємо статус на DELIVERED
 		order.setCourier(courier);
