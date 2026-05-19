@@ -14,6 +14,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
@@ -92,6 +93,36 @@ public class OrderService {
 		return toDto(saved);
 	}
 
+	@Transactional(readOnly = true)
+	public List<OrderResponseDto> getAvailableOrdersForCouriers() {
+		// Кур'єр бачить абсолютно всі замовлення, які щойно створені клієнтами
+		List<Order> availableOrders = orderRepository
+				.findByStatusAndCourierIsNullOrderByCreatedAtDesc(com.foodly.backend.entity.OrderStatus.CREATED);
+
+		logger.info("Loaded {} new orders for the courier", availableOrders.size());
+		return availableOrders.stream().map(this::toDto).collect(Collectors.toList());
+	}
+
+	@Transactional
+	public OrderResponseDto completeOrder(UUID orderId, String courierEmail) {
+		// Шукаємо замовлення в базі
+		Order order = orderRepository.findById(orderId)
+				.orElseThrow(() -> new RuntimeException("Order not found with id: " + orderId));
+
+		// Шукаємо нашого єдиного кур'єра
+		User courier = userRepository.findByEmail(courierEmail)
+				.orElseThrow(() -> new RuntimeException("Courier not found: " + courierEmail));
+
+		// Прямо міняємо статус на DELIVERED
+		order.setCourier(courier);
+		order.setStatus(com.foodly.backend.entity.OrderStatus.DELIVERED);
+
+		Order updatedOrder = orderRepository.save(order);
+		logger.info("Order {} has been successfully DELIVERED by courier {}", orderId, courierEmail);
+
+		return toDto(updatedOrder);
+	}
+
 	private OrderResponseDto toDto(Order order) {
 		BigDecimal calories = BigDecimal.ZERO;
 		BigDecimal proteins = BigDecimal.ZERO;
@@ -147,6 +178,7 @@ public class OrderService {
 			.paymentMethod(order.getPaymentMethod())
 			.status(order.getStatus() != null ? order.getStatus().name() : null)
 			.totalPrice(order.getTotalPrice())
+			.clientName(order.getUser().getFirstName())
 			.calories(calories)
 			.proteins(proteins)
 			.fats(fats)

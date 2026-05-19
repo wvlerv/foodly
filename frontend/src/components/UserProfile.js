@@ -74,6 +74,9 @@ const UserProfile = ({ onShowSuccessToast, onShowErrorToast }) => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
+  // Отримуємо роль користувача
+  const userRole = localStorage.getItem('userRole') || '';
+
   useEffect(() => {
     const fetchProfile = async () => {
       try {
@@ -150,7 +153,10 @@ const UserProfile = ({ onShowSuccessToast, onShowErrorToast }) => {
     });
   };
 
+  // НАШ ОНОВЛЕНИЙ МЕТОД ВАЛІДАЦІЇ (ОДИН, БЕЗ ДУБЛІВ):
   const validate = () => {
+    if (userRole === 'COURIER') return true;
+
     const age = Number(formData.age);
     const height = Number(formData.height);
     const weight = Number(formData.weight);
@@ -195,7 +201,6 @@ const UserProfile = ({ onShowSuccessToast, onShowErrorToast }) => {
 
       const dailyCalorieIntake = response.data?.dailyCalories ?? response.data?.dailyCalorieIntake;
 
-      // Reload profile from server to ensure all fields are up to date
       const updatedProfile = await api.get('/profile/me', {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -224,36 +229,42 @@ const UserProfile = ({ onShowSuccessToast, onShowErrorToast }) => {
     );
   }
 
+  // Визначаємо, чи потрібно нам взагалі показувати праву картку summary
+  const showSummaryCard =
+    userRole !== 'COURIER' || formData.firstName || formData.lastName || formData.username;
+
   return (
     <div className="profile-page">
       <div className="profile-page__header">
         <h1>User Profile</h1>
-        <p>Manage your health preferences and daily calorie goal.</p>
+        <p>Manage your profile details and settings.</p>
       </div>
 
       <div className="profile-layout">
         <section className="profile-card profile-form-card">
-          <div className="profile-tabs" role="tablist" aria-label="Profile sections">
-            <button
-              type="button"
-              role="tab"
-              aria-selected={activeTab === 'personal'}
-              className={`profile-tab ${activeTab === 'personal' ? 'active' : ''}`}
-              onClick={() => setActiveTab('personal')}
-            >
-              Personal Details
-            </button>
+          {userRole !== 'COURIER' && (
+            <div className="profile-tabs" role="tablist" aria-label="Profile sections">
+              <button
+                type="button"
+                role="tab"
+                aria-selected={activeTab === 'personal'}
+                className={`profile-tab ${activeTab === 'personal' ? 'active' : ''}`}
+                onClick={() => setActiveTab('personal')}
+              >
+                Personal Details
+              </button>
 
-            <button
-              type="button"
-              role="tab"
-              aria-selected={activeTab === 'health'}
-              className={`profile-tab ${activeTab === 'health' ? 'active' : ''}`}
-              onClick={() => setActiveTab('health')}
-            >
-              Health Profile
-            </button>
-          </div>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={activeTab === 'health'}
+                className={`profile-tab ${activeTab === 'health' ? 'active' : ''}`}
+                onClick={() => setActiveTab('health')}
+              >
+                Health Profile
+              </button>
+            </div>
+          )}
 
           <form className="profile-form" onSubmit={handleSubmit}>
             {activeTab === 'personal' && (
@@ -309,7 +320,7 @@ const UserProfile = ({ onShowSuccessToast, onShowErrorToast }) => {
               </div>
             )}
 
-            {activeTab === 'health' && (
+            {activeTab === 'health' && userRole !== 'COURIER' && (
               <div className="profile-form-section">
                 <div className="profile-grid profile-grid--two">
                   <label className="profile-field">
@@ -437,79 +448,86 @@ const UserProfile = ({ onShowSuccessToast, onShowErrorToast }) => {
           </form>
         </section>
 
-        <aside className="profile-card profile-summary-card">
-          {(formData.firstName || formData.lastName || formData.username) && (
-            <div className="profile-summary__identity">
-              <strong>
-                {[formData.firstName, formData.lastName].filter(Boolean).join(' ') || 'User Name'}
-              </strong>
-              <span>{formData.username ? `@${formData.username}` : 'User Name'}</span>
-            </div>
-          )}
-
-          <div className="profile-card__title">
-            <Flame size={20} />
-            <h2>Daily Goal</h2>
-          </div>
-
-          <div className="profile-summary__goal">
-            {Number(formData.dailyCalorieIntake) > 0 ? (
-              <>
+        {/* Розумне відображення правої картки */}
+        {showSummaryCard && (
+          <aside className="profile-card profile-summary-card">
+            {(formData.firstName || formData.lastName || formData.username) && (
+              <div className="profile-summary__identity">
                 <strong>
-                  Your Daily Goal: {Math.round(Number(formData.dailyCalorieIntake))} kcal
+                  {[formData.firstName, formData.lastName].filter(Boolean).join(' ') || 'User Name'}
                 </strong>
-                <p>Calculated from your profile and activity level.</p>
-              </>
-            ) : (
+                <span>{formData.username ? `@${formData.username}` : 'User Name'}</span>
+              </div>
+            )}
+
+            {userRole !== 'COURIER' && (
               <>
-                <strong>Fill the form to calculate your daily goal</strong>
-                <p>We will show your daily calorie intake here after saving the profile.</p>
+                <div className="profile-card__title">
+                  <Flame size={20} />
+                  <h2>Daily Goal</h2>
+                </div>
+
+                <div className="profile-summary__goal">
+                  {Number(formData.dailyCalorieIntake) > 0 ? (
+                    <>
+                      <strong>
+                        Your Daily Goal: {Math.round(Number(formData.dailyCalorieIntake))} kcal
+                      </strong>
+                      <p>Calculated from your profile and activity level.</p>
+                    </>
+                  ) : (
+                    <>
+                      <strong>Fill the form to calculate your daily goal</strong>
+                      <p>We will show your daily calorie intake here after saving the profile.</p>
+                    </>
+                  )}
+                </div>
+
+                <div className="profile-summary__list">
+                  <div className="profile-summary__row">
+                    <span>Age</span>
+                    <strong>{formData.age || '-'}</strong>
+                  </div>
+                  <div className="profile-summary__row">
+                    <span>Gender</span>
+                    <strong>{formData.gender || '-'}</strong>
+                  </div>
+                  <div className="profile-summary__row">
+                    <span>Height</span>
+                    <strong>{formData.height ? `${formData.height} cm` : '-'}</strong>
+                  </div>
+                  <div className="profile-summary__row">
+                    <span>Weight</span>
+                    <strong>{formData.weight ? `${formData.weight} kg` : '-'}</strong>
+                  </div>
+                  <div className="profile-summary__row">
+                    <span>Activity</span>
+                    <strong>{formData.activityMultiplier || '-'}</strong>
+                  </div>
+                  <div className="profile-summary__row">
+                    <span>Target</span>
+                    <strong>{formData.target || '-'}</strong>
+                  </div>
+                </div>
+
+                {formData.allergens.filter((a) => a !== 'string').length > 0 && (
+                  <div className="profile-summary__allergens">
+                    <span className="profile-summary__label">Selected allergens</span>
+                    <div className="profile-summary__chips">
+                      {formData.allergens
+                        .filter((a) => a !== 'string')
+                        .map((allergen) => (
+                          <span key={allergen} className="summary-chip">
+                            {allergen}
+                          </span>
+                        ))}
+                    </div>
+                  </div>
+                )}
               </>
             )}
-          </div>
-
-          <div className="profile-summary__list">
-            <div className="profile-summary__row">
-              <span>Age</span>
-              <strong>{formData.age || '-'}</strong>
-            </div>
-            <div className="profile-summary__row">
-              <span>Gender</span>
-              <strong>{formData.gender || '-'}</strong>
-            </div>
-            <div className="profile-summary__row">
-              <span>Height</span>
-              <strong>{formData.height ? `${formData.height} cm` : '-'}</strong>
-            </div>
-            <div className="profile-summary__row">
-              <span>Weight</span>
-              <strong>{formData.weight ? `${formData.weight} kg` : '-'}</strong>
-            </div>
-            <div className="profile-summary__row">
-              <span>Activity</span>
-              <strong>{formData.activityMultiplier || '-'}</strong>
-            </div>
-            <div className="profile-summary__row">
-              <span>Target</span>
-              <strong>{formData.target || '-'}</strong>
-            </div>
-          </div>
-
-          {formData.allergens.filter((a) => a !== 'string').length > 0 && (
-            <div className="profile-summary__allergens">
-              <span className="profile-summary__label">Selected allergens</span>
-              <div className="profile-summary__chips">
-                {formData.allergens
-                  .filter((a) => a !== 'string')
-                  .map((allergen) => (
-                    <span key={allergen} className="summary-chip">
-                      {allergen}
-                    </span>
-                  ))}
-              </div>
-            </div>
-          )}
-        </aside>
+          </aside>
+        )}
       </div>
     </div>
   );
