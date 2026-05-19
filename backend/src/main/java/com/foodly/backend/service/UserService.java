@@ -59,17 +59,17 @@ public class UserService {
 	}
 
 	public Map<String, String> authenticateUser(LoginRequest loginRequest) {
-		UsernamePasswordAuthenticationToken authRequest = new UsernamePasswordAuthenticationToken(
-				loginRequest.getEmail(), loginRequest.getPassword());
-		Authentication authentication = authenticationManager.authenticate(authRequest);
-
 		User user = userRepository.findByEmail(loginRequest.getEmail())
-				.orElseThrow(() -> new BadCredentialsException("User not found"));
+				.orElseThrow(() -> new BadCredentialsException("Invalid email or password"));
 
 		if (user.isBanned()) {
 			log.warn("LOG-05: Login rejected - User {} is banned", maskEmail(user.getEmail()));
 			throw new LockedException("Your account has been banned. Please contact support.");
 		}
+
+		UsernamePasswordAuthenticationToken authRequest = new UsernamePasswordAuthenticationToken(
+				loginRequest.getEmail(), loginRequest.getPassword());
+		Authentication authentication = authenticationManager.authenticate(authRequest);
 
 		String token = jwtUtils.generateToken(authentication.getName());
 

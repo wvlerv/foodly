@@ -6,22 +6,18 @@ import './AdminPanel.css';
 const AdminPanel = ({ onShowSuccessToast, onShowErrorToast }) => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const currentAdminEmail = localStorage.getItem('userEmail');
 
-  // 2. ФУНКЦІЯ getAuthHeaders БІЛЬШЕ НЕ ПОТРІБНА, якщо у вашому axios налаштований interceptor.
-  // Але про всяк випадок додамо передачу токена через константу, якщо interceptor немає.
   const authConfig = {
     headers: {
       Authorization: `Bearer ${localStorage.getItem('token')}`,
     },
   };
 
-  // Завантаження користувачів
   const fetchUsers = async () => {
     try {
-      // Запит робимо відносно baseURL вашого Axios (наприклад, '/admin/users')
       const response = await api.get('/admin/users', authConfig);
 
-      // В Axios результат лежить у полі .data і вже є готовим масивом/об'єктом
       setUsers(response.data);
     } catch (error) {
       // Гнучке отримання помилки від бекенду
@@ -36,10 +32,8 @@ const AdminPanel = ({ onShowSuccessToast, onShowErrorToast }) => {
     fetchUsers();
   }, []);
 
-  // Зміна ролі
   const handleRoleChange = async (userId, newRole) => {
     try {
-      // Тіло запиту передаємо другим аргументом { role: newRole }, а конфіг із токеном - третім
       await api.put(`/admin/users/${userId}/role`, { role: newRole }, authConfig);
 
       onShowSuccessToast('Role updated successfully');
@@ -50,17 +44,22 @@ const AdminPanel = ({ onShowSuccessToast, onShowErrorToast }) => {
     }
   };
 
-  // Бан / Розбан
   const handleToggleBan = async (userId, isBanned) => {
     const endpoint = isBanned ? 'unban' : 'ban';
     try {
-      // Для PUT запиту без тіла передаємо порожній об'єкт {} другим аргументом, а конфіг - третім
       await api.put(`/admin/users/${userId}/${endpoint}`, {}, authConfig);
 
       onShowSuccessToast(`User ${isBanned ? 'unbanned' : 'banned'} successfully`);
       fetchUsers();
     } catch (error) {
-      const backendMessage = error.response?.data?.message || error.message;
+      let backendMessage = error.message;
+      if (error.response && error.response.data) {
+        if (typeof error.response.data === 'string') {
+          backendMessage = error.response.data;
+        } else if (error.response.data.message) {
+          backendMessage = error.response.data.message;
+        }
+      }
       onShowErrorToast(backendMessage);
     }
   };
@@ -112,8 +111,15 @@ const AdminPanel = ({ onShowSuccessToast, onShowErrorToast }) => {
                 <td>
                   <button
                     onClick={() => handleToggleBan(user.id, user.isBanned || user.banned)}
-                    className={`btn-action ${user.isBanned || user.banned ? 'btn-unban' : 'btn-ban'}`}
-                    title={user.isBanned || user.banned ? 'Unban user' : 'Ban user'}
+                    disabled={user.email === currentAdminEmail}
+                    className={`btn-action ${user.isBanned || user.banned ? 'btn-unban' : 'btn-ban'} ${user.email === currentAdminEmail ? 'btn-disabled' : ''}`}
+                    title={
+                      user.email === currentAdminEmail
+                        ? 'You cannot ban yourself'
+                        : user.isBanned || user.banned
+                          ? 'Unban user'
+                          : 'Ban user'
+                    }
                   >
                     {user.isBanned || user.banned ? <CheckCircle size={18} /> : <Ban size={18} />}
                     {user.isBanned || user.banned ? ' Unban' : ' Ban'}

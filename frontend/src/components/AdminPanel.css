@@ -106,3 +106,9 @@
     font-size: 18px;
     color: #7f8c8d;
 }
+.btn-action:disabled, .btn-disabled {
+    background-color: #f5f5f5 !important;
+    color: #cccccc !important;
+    cursor: not-allowed !important;
+    opacity: 0.6;
+}

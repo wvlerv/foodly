@@ -28,7 +28,7 @@ public class AdminSeeder implements CommandLineRunner {
                     .firstName("Admin")
                     .lastName("Global")
                     .username("admin")
-                    .password(passwordEncoder.encode("admin123"))
+                    .password(passwordEncoder.encode("adminUlt4#"))
                     .role(Role.ADMIN)
                     .isBanned(false)
                     .build();

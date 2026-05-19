@@ -28,9 +28,12 @@ public class AdminService {
     }
 
     @Transactional
-    public void toggleUserBan(UUID userId, boolean banStatus) {
+    public void toggleUserBan(UUID userId, boolean banStatus, String currentAdminEmail) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + userId));
+        if (user.getEmail().equalsIgnoreCase(currentAdminEmail)) {
+            throw new IllegalStateException("You cannot ban yourself!");
+        }
         user.setBanned(banStatus);
     }
 }

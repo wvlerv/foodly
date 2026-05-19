@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Utensils, ShoppingCart, User, Heart as HeartIcon, ShieldCheck } from 'lucide-react';
+import { Utensils, ShoppingCart, User, Heart as HeartIcon } from 'lucide-react';
 import './Header.css';
 import { LogOut, LogIn } from 'lucide-react';
 
@@ -33,7 +33,6 @@ const Header = ({ cartCount, isAuthenticated, userRole, onLogout }) => {
           </Link>
           {isAuthenticated && userRole === 'ADMIN' && (
             <Link to="/admin" className={`header__nav-link admin-link ${getActiveClass('/admin')}`}>
-              <ShieldCheck size={18} style={{ marginRight: '4px', verticalAlign: 'middle' }} />
               Admin Panel
             </Link>
           )}

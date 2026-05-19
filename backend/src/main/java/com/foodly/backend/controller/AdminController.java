@@ -7,6 +7,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.Authentication;
+import org.springframework.http.HttpStatus;
 
 import java.util.List;
 import java.util.UUID;
@@ -31,14 +33,29 @@ public class AdminController {
     }
 
     @PutMapping("/users/{id}/ban")
-    public ResponseEntity<String> banUser(@PathVariable UUID id) {
-        adminService.toggleUserBan(id, true);
-        return ResponseEntity.ok("User has been banned");
+    public ResponseEntity<String> banUser(@PathVariable UUID id, Authentication authentication) {
+        String currentAdminEmail = authentication.getName();
+
+        try {
+            adminService.toggleUserBan(id, true, currentAdminEmail);
+            return ResponseEntity.ok("User has been banned");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
     }
 
     @PutMapping("/users/{id}/unban")
-    public ResponseEntity<String> unbanUser(@PathVariable UUID id) {
-        adminService.toggleUserBan(id, false);
-        return ResponseEntity.ok("User has been unbanned");
+    public ResponseEntity<String> unbanUser(@PathVariable UUID id, Authentication authentication) {
+        String currentAdminEmail = authentication.getName();
+        try {
+            adminService.toggleUserBan(id, false, currentAdminEmail);
+            return ResponseEntity.ok("User has been unbanned");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
     }
 }
