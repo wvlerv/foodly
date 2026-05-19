@@ -77,8 +77,8 @@ const AuthPage = ({ onLoginSuccess, onShowErrorToast }) => {
     try {
       if (isLogin) {
         const data = await authService.login(formData.email, formData.password);
-        onLoginSuccess(data.role);
-        navigate('/menu');
+        // Передаємо дані про успішний вхід в App.js.
+        onLoginSuccess();
       } else {
         await authService.register({
           firstName: formData.firstName,

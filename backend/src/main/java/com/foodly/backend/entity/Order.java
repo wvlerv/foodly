@@ -42,7 +42,11 @@ public class Order {
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_id", nullable = false)
-	private User user;
+	private User user;	// Клієнт, який зробив замовлення
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "courier_id", nullable = true)
+	private User courier; // Кур'єр, який взяв замовлення в роботу
 
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)

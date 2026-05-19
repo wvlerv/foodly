@@ -42,4 +42,5 @@ public class OrderResponseDto implements Serializable {
 	// List of ordered items with image and price at purchase
 	private List<com.foodly.backend.dto.OrderItemDto> items;
 
+	private String clientName;
 }

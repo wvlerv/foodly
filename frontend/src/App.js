@@ -15,6 +15,7 @@ import AuthPage from './components/AuthPage';
 import { initInactivityTracking } from './utils/inactivityTimeout';
 import AdminPanel from './components/AdminPanel';
 import ShieldAlert from 'lucide-react';
+import CourierDashboard from './components/CourierDashboard';
 
 function AppContent() {
   const navigate = useNavigate();
@@ -31,7 +32,7 @@ function AppContent() {
       initInactivityTracking();
     }
   }, [isAuthenticated]);
-  
+
   const triggerToast = (message) => {
     setToastMessage(message);
     setToastType('success');
@@ -90,7 +91,18 @@ function AppContent() {
 
   const handleLoginSuccess = () => {
     setIsAuthenticated(true);
-    setUserRole(localStorage.getItem('userRole') || '');
+    const role = localStorage.getItem('userRole') || '';
+    setUserRole(role);
+
+    // Розумний редірект залежно від ролі
+    if (role === 'COURIER') {
+      navigate('/courier', { replace: true });
+      triggerToast('Welcome to Delivery Dashboard!');
+    } else if (role === 'ADMIN') {
+      navigate('/admin', { replace: true });
+    } else {
+      navigate('/menu', { replace: true });
+    }
   };
 
   // Рахуємо кількість товарів для хедера
@@ -138,11 +150,15 @@ function AppContent() {
           <Route
             path="/menu"
             element={
-              <MenuCatalog
-                dishes={mockDishes}
-                onAddToCart={addToCart}
-                onShowErrorToast={triggerErrorToast}
-              />
+              isAuthenticated && userRole === 'COURIER' ? (
+                <Navigate to="/courier" replace />
+              ) : (
+                <MenuCatalog
+                  dishes={mockDishes}
+                  onAddToCart={addToCart}
+                  onShowErrorToast={triggerErrorToast}
+                />
+              )
             }
           />
 
@@ -203,6 +219,23 @@ function AppContent() {
 
           {/* Замовлення */}
           <Route path="/orders" element={<OrdersPage />} />
+
+          {/* Панель кур'єра */}
+          <Route
+            path="/courier"
+            element={
+              isAuthenticated && userRole === 'COURIER' ? (
+                <CourierDashboard
+                  onShowSuccessToast={triggerToast}
+                  onShowErrorToast={triggerErrorToast}
+                />
+              ) : (
+                <Navigate to="/menu" replace />
+              )
+            }
+          />
+
+          {/* Сторінка адміна */}
           <Route
             path="/admin"
             element={
@@ -217,7 +250,16 @@ function AppContent() {
             }
           />
           {/* Редірект з порожньої адреси на меню */}
-          <Route path="/" element={<Navigate to="/menu" replace />} />
+          <Route
+            path="/"
+            element={
+              isAuthenticated && userRole === 'COURIER' ? (
+                <Navigate to="/courier" replace />
+              ) : (
+                <Navigate to="/menu" replace />
+              )
+            }
+          />
         </Routes>
       </main>
 
