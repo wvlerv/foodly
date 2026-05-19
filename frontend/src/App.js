@@ -14,7 +14,6 @@ import authService from './services/authService';
 import AuthPage from './components/AuthPage';
 import { initInactivityTracking } from './utils/inactivityTimeout';
 import AdminPanel from './components/AdminPanel';
-import ShieldAlert from 'lucide-react';
 
 function AppContent() {
   const navigate = useNavigate();

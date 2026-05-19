@@ -1,5 +1,5 @@
 import React from 'react';
-import { AlertTriangle, Heart, ShoppingCart } from 'lucide-react';
+import { AlertTriangle, Heart, ShoppingCart, Eye, EyeOff } from 'lucide-react';
 import './DishCard.css';
 
 const DishCard = ({
@@ -8,8 +8,10 @@ const DishCard = ({
   isFavorite = false,
   onToggleFavorite = null,
   matchedAllergens = [],
+  onToggleAvailability = null,
 }) => {
   const {
+    id,
     name = 'Unknown Dish',
     price = 0,
     proteins = 0,
@@ -19,8 +21,12 @@ const DishCard = ({
     imageUrl = '',
   } = dish;
 
-  const isAvailable = dish.available ?? dish.isAvailable ?? true;
+  const token = localStorage.getItem('token');
+  const hasValidToken = token && token !== 'undefined' && token !== 'null';
+  const userRole = localStorage.getItem('userRole');
+  const isManagerOrAdmin = hasValidToken && (userRole === 'MANAGER' || userRole === 'ADMIN');
 
+  const isAvailable = dish.available ?? dish.isAvailable ?? true;
   const totalMacroCalories = proteins * 4 + carbohydrates * 4 + fats * 9;
 
   const getPercentage = (val, multiplier) =>
@@ -34,14 +40,17 @@ const DishCard = ({
     <div className={`dish-card ${!isAvailable ? 'dish-card--unavailable' : ''}`}>
       <div className="dish-card__image-wrapper">
         <img src={imageUrl} alt={name} className="dish-card__image" />
-
-        {!isAvailable && <div className="dish-card__unavailable">Out of Stock</div>}
+        {!isAvailable && (
+          <div className="dish-card__unavailable">
+            {isManagerOrAdmin ? 'In Stop-List' : 'Out of Stock'}
+          </div>
+        )}
 
         <button
           className={`dish-card__favorite-btn ${isFavorite ? 'active' : ''}`}
           onClick={(e) => {
             e.stopPropagation();
-            onToggleFavorite?.(dish.id);
+            onToggleFavorite?.(id);
           }}
         >
           <Heart
@@ -105,15 +114,27 @@ const DishCard = ({
             ))}
           </div>
         </div>
+        {isManagerOrAdmin && (
+          <button
+            type="button"
+            className={`dish-card__stop-list-btn ${isAvailable ? 'btn-hide' : 'btn-show'}`}
+            onClick={() => onToggleAvailability?.(id, !isAvailable)}
+          >
+            {isAvailable ? <EyeOff size={16} /> : <Eye size={16} />}
+            <span>{isAvailable ? 'Put on Stop-List' : 'Bring back to Menu'}</span>
+          </button>
+        )}
 
-        <button
-          className="dish-card__add-btn"
-          onClick={() => isAvailable && onAddToCart(dish)}
-          disabled={!isAvailable}
-        >
-          <ShoppingCart size={18} />
-          <span>{isAvailable ? 'Add to Order' : 'Unavailable'}</span>
-        </button>
+        {(!isManagerOrAdmin || isAvailable) && (
+          <button
+            className="dish-card__add-btn"
+            onClick={() => isAvailable && onAddToCart(dish)}
+            disabled={!isAvailable}
+          >
+            <ShoppingCart size={18} />
+            <span>{isAvailable ? 'Add to Order' : 'Unavailable'}</span>
+          </button>
+        )}
       </div>
     </div>
   );

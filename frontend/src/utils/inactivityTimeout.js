@@ -1,6 +1,6 @@
 import authService from '../services/authService';
 
-const TWENTY_FOUR_HOURS = 10 * 1000;
+const TWENTY_FOUR_HOURS = 100 * 1000;
 let inactivityTimer = null;
 
 const performAutoLogout = async () => {

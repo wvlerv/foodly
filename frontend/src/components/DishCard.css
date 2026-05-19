@@ -1,54 +1,6 @@
-/* Додаткові стилі для ціни та кнопки */
-
-/* Оновлена синя кнопка та акцент на ціні */
-
-.dish-card__price {
-  color: #00b894; /* Змінюємо ціну на зелену, щоб вона пасувала до кнопки */
-  font-size: 1.4rem;
-}
-
-.dish-card__add-btn {
-  margin-top: 20px;
-  width: 100%;
-  padding: 12px;
-  background: #111827; /* Темний колір у спокої */
-  color: white;
-  border: none;
-  border-radius: 10px;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.dish-card__add-btn:hover:not(:disabled) {
-  background: #00b894; /* Гарний зелений колір при наведенні */
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 184, 148, 0.3); /* Зелена тінь */
-}
-
-.dish-card__add-btn:active:not(:disabled) {
-  transform: translateY(0);
-}
-
-.dish-card__add-btn:disabled {
-  background: #e5e7eb;
-  color: #9ca3af;
-  cursor: not-allowed;
-}
-
-/* Якщо страви немає в наявності, картка стає трохи прозорою */
-.dish-card--unavailable {
-  opacity: 0.75;
-}
-
-/* Фікс, щоб тіло картки займало весь простір і кнопка завжди була внизу */
-.dish-card__body {
-  flex-grow: 1;
-}
+/* ==========================================================================
+   1. ОСНОВНІ СТИЛІ КАРТКИ (ГЛОБАЛЬНІ)
+   ========================================================================== */
 
 .dish-card {
   display: flex;
@@ -62,9 +14,9 @@
   overflow: hidden;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
   transition:
-    transform 0.22s ease,
-    box-shadow 0.22s ease,
-    border-color 0.22s ease;
+          transform 0.22s ease,
+          box-shadow 0.22s ease,
+          border-color 0.22s ease;
 }
 
 .dish-card:hover {
@@ -72,6 +24,19 @@
   box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
   border-color: #e6e6e6;
 }
+
+/* Фікс, щоб тіло картки займало весь простір і кнопки завжди були внизу */
+.dish-card__body {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding: 20px;
+  flex-grow: 1;
+}
+
+/* ==========================================================================
+   2. ЗОНА ЗОБРАЖЕННЯ ТА АБСОЛЮТНІ ЕЛЕМЕНТИ
+   ========================================================================== */
 
 .dish-card__image-wrapper {
   position: relative;
@@ -89,19 +54,20 @@
   border-radius: 12px 12px 0 0;
 }
 
+/* Перенесли на лівий бік, щоб не заважати кнопці улюбленого */
 .dish-card__unavailable {
   position: absolute;
   top: 12px;
-  right: 12px;
-  background: rgba(17, 24, 39, 0.8);
+  left: 12px;
+  background: rgba(17, 24, 39, 0.85);
   color: #fff;
-  padding: 4px 8px;
+  padding: 6px 12px;
   border-radius: 999px;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 600;
+  z-index: 2;
 }
 
-/* Favorite Button Styles */
 .dish-card__favorite-btn {
   position: absolute;
   top: 12px;
@@ -118,6 +84,7 @@
   transition: all 0.2s ease;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   padding: 0;
+  z-index: 2;
 }
 
 .dish-card__favorite-btn:hover {
@@ -129,21 +96,9 @@
   background: rgba(255, 68, 68, 0.15);
 }
 
-.dish-card__body {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  padding: 20px;
-}
-
-.dish-card__name {
-  margin: 0 0 12px 0;
-  font-size: 1.08rem;
-  line-height: 1.22;
-  font-weight: 700;
-  color: #111827;
-  letter-spacing: -0.02em;
-}
+/* ==========================================================================
+   3. ТЕКСТ ТА МЕТА-ДАНІ
+   ========================================================================== */
 
 .dish-card__title-wrapper {
   display: flex;
@@ -153,8 +108,13 @@
   margin-bottom: 12px;
 }
 
-.dish-card__title-wrapper .dish-card__name {
-  margin-bottom: 0;
+.dish-card__name {
+  margin: 0;
+  font-size: 1.08rem;
+  line-height: 1.22;
+  font-weight: 700;
+  color: #111827;
+  letter-spacing: -0.02em;
 }
 
 .dish-card__title-warning {
@@ -188,7 +148,7 @@
   line-clamp: 2;
   overflow: hidden;
   min-height: 3em;
-  margin: 0 0 9px 0; /* більше простору між описом і ціною */
+  margin: 0 0 9px 0;
   color: #666;
   font-size: 0.9rem;
   line-height: 1.45;
@@ -200,15 +160,16 @@
   flex-wrap: wrap;
   gap: 10px;
   margin-top: 8px;
-  margin-bottom: 12px; /* зменшено відстань між ціною і блоком КБЖУ */
+  margin-bottom: 12px;
 }
 
+/* Виправлено дублювання кольорів (акцент під зелену кнопку наведення) */
 .dish-card__price {
   margin: 0;
-  font-size: 1.25rem;
+  font-size: 1.35rem;
   line-height: 1;
   font-weight: 800;
-  color: #16a34a;
+  color: #00b894;
   letter-spacing: -0.03em;
 }
 
@@ -221,13 +182,12 @@
 .dish-card__allergen-badge {
   display: inline-flex;
   align-items: center;
-  gap: 2px;
-  background: #ff4444; /* Акцентний червоний для плашок алергенів */
+  gap: 4px;
+  background: #ff4444;
   padding: 4px 10px;
   border-radius: 6px;
   font-size: 0.78rem;
   color: #ffffff;
-  border: none;
   line-height: 1.2;
   white-space: nowrap;
 }
@@ -238,8 +198,12 @@
   height: 14px;
 }
 
+/* ==========================================================================
+   4. БЛОК ХАРЧОВОЇ ЦІННОСТІ (КБЖУ)
+   ========================================================================== */
+
 .dish-card__nutrition {
-  margin-top: 12px;
+  margin-top: auto; /* притискає КБЖУ до низу перед кнопками */
   padding-top: 12px;
   border-top: 1px solid #e5e7eb;
 }
@@ -305,163 +269,110 @@
   transition: width 0.3s ease;
 }
 
-.protein-bar {
-  background: #ef4444;
+.protein-bar { background: #ef4444; }
+.fat-bar { background: #f59e0b; }
+.carbs-bar { background: #3b82f6; }
+
+/* ==========================================================================
+   5. КНОПКИ (ADD TO CART & MANAGER STOP-LIST)
+   ========================================================================== */
+
+.dish-card__add-btn {
+  margin-top: 14px;
+  width: 100%;
+  padding: 12px;
+  background: #111827;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-.fat-bar {
-  background: #f59e0b;
+.dish-card__add-btn:hover:not(:disabled) {
+  background: #00b894;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 184, 148, 0.3);
 }
 
-.carbs-bar {
-  background: #3b82f6;
+.dish-card__add-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.dish-card__add-btn:disabled {
+  background: #e5e7eb;
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+
+/* СТИЛІ СТОП-ЛИСТА ДЛЯ МЕНЕДЖЕРА — тепер вони доступні ВСЮДИ */
+.dish-card__stop-list-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 11px;
+  margin-top: 12px;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.dish-card__stop-list-btn.btn-hide {
+  background-color: #fffbe6;
+  color: #d46b08;
+  border: 1px solid #ffe58f;
+}
+.dish-card__stop-list-btn.btn-hide:hover {
+  background-color: #ffe58f;
+}
+
+.dish-card__stop-list-btn.btn-show {
+  background-color: #f6ffed;
+  color: #389e0d;
+  border: 1px solid #b7eb8f;
+}
+.dish-card__stop-list-btn.btn-show:hover {
+  background-color: #b7eb8f;
+}
+
+.dish-card--unavailable {
+  opacity: 0.7;
+  border: 2px dashed #ff4d4f;
+  background-color: #fff1f0;
 }
 
 @media (min-width: 769px) {
-  .dish-card__body {
-    padding: 20px;
-  }
-
-  .dish-card__name {
-    font-size: 1.12rem;
-    font-weight: 700;
-  }
-
-  .dish-card__price {
-    font-size: 1.28rem;
-  }
-
-  .dish-card__nutrition {
-    padding: 12px;
-  }
-
-  .nutrition-item {
-    padding: 7px;
-  }
+  .dish-card__name { font-size: 1.12rem; }
+  .dish-card__price { font-size: 1.4rem; }
 }
 
 @media (max-width: 768px) {
-  .dish-card {
-    min-height: 420px;
-  }
-
-  .dish-card__body {
-    padding: 18px;
-  }
-
-  .dish-card__name {
-    font-size: 1rem;
-  }
-
-  .dish-card__description {
-    font-size: 0.88rem;
-  }
-
-  .dish-card__price {
-    font-size: 1.16rem;
-  }
-
-  .dish-card__nutrition {
-    padding: 9px;
-  }
-}
-
-@media (min-width: 481px) and (max-width: 770px) {
-  .nutrition-item__label {
-    font-size: 0.58rem;
-  }
-
-  .dish-card__body {
-    padding: 12px;
-  }
-}
-
-@media (min-width: 771px) {
-  .nutrition-item__label {
-    font-size: 0.64rem;
-  }
-  .nutrition-grid {
-    gap: 8px;
-  }
+  .dish-card__body { padding: 18px; }
+  .dish-card__name { font-size: 1rem; }
+  .dish-card__description { font-size: 0.88rem; }
+  .dish-card__price { font-size: 1.2rem; }
 }
 
 @media (max-width: 480px) {
-  .dish-card {
-    min-height: 420px;
-  }
-
-  .dish-card__body {
-    padding: 16px;
-  }
-
-  .dish-card__name {
-    font-size: 0.98rem;
-  }
-
-  .dish-card__description {
-    min-height: 3em;
-    font-size: 0.86rem;
-  }
-
-  .dish-card__price {
-    font-size: 1.1rem;
-  }
-
-  .dish-card__allergen-badge {
-    font-size: 0.72rem;
-    padding: 2px 6px;
-  }
-
-  .dish-card__nutrition {
-    padding: 8px;
-  }
-
-  .nutrition-item {
-    padding: 5px;
-  }
+  .dish-card__body { padding: 16px; }
+  .dish-card__name { font-size: 0.98rem; }
+  .dish-card__description { font-size: 0.86rem; }
+  .dish-card__price { font-size: 1.15rem; }
+  .dish-card__allergen-badge { font-size: 0.72rem; padding: 2px 6px; }
 }
 
 @media (max-width: 359px) {
-  .dish-card__body {
-    padding: 14px;
-  }
-
-  .dish-card__description {
-    font-size: 0.82rem;
-  }
-
-  .dish-card__meta-row {
-    gap: 8px;
-    margin-bottom: 14px;
-  }
-
-  .dish-card__allergen-badges {
-    gap: 5px;
-  }
-
-  .dish-card__allergen-badge {
-    font-size: 0.68rem;
-    padding: 2px 5px;
-  }
-
-  .dish-card__nutrition {
-    padding: 7px;
-  }
-
-  .nutrition-grid {
-    gap: 3px;
-  }
-
-  .nutrition-item {
-    padding: 4px;
-  }
-
-  .nutrition-item__label,
-  .nutrition-item__percentage {
-    font-size: 0.62rem;
-  }
-
-  .nutrition-item__value {
-    font-size: 0.73rem;
-  }
+  .dish-card__body { padding: 12px; }
+  .dish-card__description { font-size: 0.82rem; }
+  .dish-card__meta-row { gap: 8px; margin-bottom: 10px; }
+  .dish-card__allergen-badge { font-size: 0.68rem; padding: 2px 5px; }
 }
