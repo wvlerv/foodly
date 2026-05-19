@@ -8,11 +8,15 @@ import io.micrometer.core.instrument.MeterRegistry;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 /**
  * Service for managing dishes and applying filters. Implements the "Fit my day" logic
@@ -39,19 +43,22 @@ public class DishService {
 	 * (name)
 	 * @return List of available dishes as DTOs
 	 */
-	public List<DishResponseDto> getAllDishes(String sortBy) {
+	public List<DishResponseDto> getAllDishes(String sortBy, boolean isManagerOrAdmin) {
 		List<Dish> dishes;
-
 		List<String> allowedSorts = List.of("proteins", "calories", "fats", "carbs");
 
 		if (sortBy != null && allowedSorts.contains(sortBy.toLowerCase())) {
-			dishes = dishRepository.findAllAvailableSorted(sortBy.toLowerCase());
+			dishes = isManagerOrAdmin
+					? dishRepository.findAllSortedForAdmin(sortBy.toLowerCase())
+					: dishRepository.findAllAvailableSorted(sortBy.toLowerCase());
 		}
 		else {
-			dishes = dishRepository.findAllAvailable();
+			dishes = isManagerOrAdmin
+					? dishRepository.findAllForAdmin()
+					: dishRepository.findAllAvailable();
 		}
 
-		logger.info("Catalog loaded: {} dishes", dishes.size());
+		logger.info("Catalog loaded: {} dishes (Admin mode: {})", dishes.size(), isManagerOrAdmin);
 		return dishes.stream().map(DishResponseDto::from).collect(Collectors.toList());
 	}
 
@@ -95,4 +102,11 @@ public class DishService {
 		return filtered;
 	}
 
+	@Transactional
+	public void toggleAvailability(UUID dishId, boolean available) {
+		Dish dish = dishRepository.findById(dishId)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Dish not found"));
+
+		dish.setAvailable(available);
+	}
 }

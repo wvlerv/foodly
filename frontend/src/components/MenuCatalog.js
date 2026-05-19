@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import DishCard from './DishCard';
-import { getAllDishes } from '../services/dishService';
+import { getAllDishes, toggleDishAvailability } from '../services/dishService';
 import api from '../api/axios';
 import './MenuCatalog.css';
 import { CirclePlus } from 'lucide-react';
@@ -195,17 +195,23 @@ const MenuCatalog = ({
   };
 
   const handleAddToCart = (dish) => {
-    const matchedAllergens = getMatchedAllergens(dish.allergens);
-
-    if (matchedAllergens.length > 0) {
-      setWarningDish({
-        dish,
-        matchedAllergens,
-      });
+    const token = localStorage.getItem('token');
+    const hasValidToken = token && token !== 'undefined' && token !== 'null';
+    if (!hasValidToken) {
+      if (typeof onShowErrorToast === 'function') {
+        onShowErrorToast('Log in to order');
+      } else {
+        alert('Log in to order');
+      }
       return;
     }
 
-    onAddToCart?.(dish);
+    const matched = getMatchedAllergens(dish.allergens);
+    if (matched.length > 0) {
+      setWarningDish({ dish, matchedAllergens: matched });
+    } else {
+      onAddToCart?.(dish);
+    }
   };
 
   const handleCancelWarning = () => {
@@ -217,6 +223,20 @@ const MenuCatalog = ({
       onAddToCart?.(warningDish.dish);
     }
     setWarningDish(null);
+  };
+
+  const handleStatusChange = async (dishId, newStatus) => {
+    try {
+      await toggleDishAvailability(dishId, newStatus);
+      setDishes((prevDishes) =>
+        prevDishes.map((d) =>
+          d.id === dishId ? { ...d, isAvailable: newStatus, available: newStatus } : d
+        )
+      );
+    } catch (err) {
+      const errMsg = err.response?.data?.message || 'Failed to update dish availability';
+      onShowErrorToast(errMsg);
+    }
   };
 
   /**
@@ -366,6 +386,7 @@ const MenuCatalog = ({
                   isFavorite={favoriteIds.includes(dish.id)}
                   onToggleFavorite={toggleFavorite}
                   matchedAllergens={getMatchedAllergens(dish.allergens)}
+                  onToggleAvailability={handleStatusChange}
                 />
               </div>
             ))}
