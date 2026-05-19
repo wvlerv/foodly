@@ -6,23 +6,25 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class TokenBlacklistService {
-    private final Map<String, Long> blacklist = new ConcurrentHashMap<>();
 
-    public void blacklistToken(String token, long expirationTimeMillis) {
-        blacklist.put(token, expirationTimeMillis);
-    }
+	private final Map<String, Long> blacklist = new ConcurrentHashMap<>();
 
-    public boolean isBlacklisted(String token) {
-        Long expiration = blacklist.get(token);
-        if (expiration == null) {
-            return false;
-        }
+	public void blacklistToken(String token, long expirationTimeMillis) {
+		blacklist.put(token, expirationTimeMillis);
+	}
 
-        if (System.currentTimeMillis() > expiration) {
-            blacklist.remove(token);
-            return false;
-        }
+	public boolean isBlacklisted(String token) {
+		Long expiration = blacklist.get(token);
+		if (expiration == null) {
+			return false;
+		}
 
-        return true;
-    }
+		if (System.currentTimeMillis() > expiration) {
+			blacklist.remove(token);
+			return false;
+		}
+
+		return true;
+	}
+
 }

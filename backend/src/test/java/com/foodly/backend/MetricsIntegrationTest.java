@@ -15,107 +15,106 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @DisplayName("Тестування метрик моніторингу (Counter та Gauge)")
 class MetricsIntegrationTest {
 
-    private MeterRegistry meterRegistry;
-    private AtomicInteger activeSessions; // Об'єкт для відстеження значення Gauge
+	private MeterRegistry meterRegistry;
 
-    @BeforeEach
-    void setUp() {
-        // Використовуємо ізольований реєстр метрик для кожного тесту
-        meterRegistry = new SimpleMeterRegistry();
-        activeSessions = new AtomicInteger(0);
-    }
+	private AtomicInteger activeSessions; // Об'єкт для відстеження значення Gauge
 
-    // =========================================================================
-    // БЛОК 1: ТЕСТИ ЛІЧИЛЬНИКА (COUNTER TESTS)
-    // Умова: Після N запитів лічильник запитів дорівнює N
-    // =========================================================================
+	@BeforeEach
+	void setUp() {
+		// Використовуємо ізольований реєстр метрик для кожного тесту
+		meterRegistry = new SimpleMeterRegistry();
+		activeSessions = new AtomicInteger(0);
+	}
 
-    @Test
-    @DisplayName("1. Counter: Одне замовлення збільшує лічильник рівно на 1")
-    void testCounterIncrementByOne() {
-        Counter orderCounter = meterRegistry.counter("foodly.orders.total");
+	// =========================================================================
+	// БЛОК 1: ТЕСТИ ЛІЧИЛЬНИКА (COUNTER TESTS)
+	// Умова: Після N запитів лічильник запитів дорівнює N
+	// =========================================================================
 
-        // Імітуємо 1 запит на створення замовлення
-        orderCounter.increment();
+	@Test
+	@DisplayName("1. Counter: Одне замовлення збільшує лічильник рівно на 1")
+	void testCounterIncrementByOne() {
+		Counter orderCounter = meterRegistry.counter("foodly.orders.total");
 
-        assertEquals(1.0, orderCounter.count(), "Лічильник має дорівнювати 1 після одного запиту");
-    }
+		// Імітуємо 1 запит на створення замовлення
+		orderCounter.increment();
 
-    @Test
-    @DisplayName("2. Counter: Серія з N запитів (N=5) встановлює значення лічильника в N")
-    void testCounterIncrementByN() {
-        Counter orderCounter = meterRegistry.counter("foodly.orders.total");
-        int n = 5;
+		assertEquals(1.0, orderCounter.count(), "Лічильник має дорівнювати 1 після одного запиту");
+	}
 
-        // Імітуємо N запитів до ендпоінту
-        for (int i = 0; i < n; i++) {
-            orderCounter.increment();
-        }
+	@Test
+	@DisplayName("2. Counter: Серія з N запитів (N=5) встановлює значення лічильника в N")
+	void testCounterIncrementByN() {
+		Counter orderCounter = meterRegistry.counter("foodly.orders.total");
+		int n = 5;
 
-        assertEquals(5.0, orderCounter.count(), "Після 5 запитів лічильник повинен показувати рівно 5.0");
-    }
+		// Імітуємо N запитів до ендпоінту
+		for (int i = 0; i < n; i++) {
+			orderCounter.increment();
+		}
 
-    @Test
-    @DisplayName("3. Counter: Велика кількість запитів (N=100) не викликає збоїв чи втрати точності")
-    void testCounterLargeIncrement() {
-        Counter apiRequestsCounter = meterRegistry.counter("foodly.api.requests");
-        int n = 100;
+		assertEquals(5.0, orderCounter.count(), "Після 5 запитів лічильник повинен показувати рівно 5.0");
+	}
 
-        for (int i = 0; i < n; i++) {
-            apiRequestsCounter.increment();
-        }
+	@Test
+	@DisplayName("3. Counter: Велика кількість запитів (N=100) не викликає збоїв чи втрати точності")
+	void testCounterLargeIncrement() {
+		Counter apiRequestsCounter = meterRegistry.counter("foodly.api.requests");
+		int n = 100;
 
-        assertEquals(100.0, apiRequestsCounter.count(), "Лічильник повинен чітко зафіксувати 100 запитів");
-    }
+		for (int i = 0; i < n; i++) {
+			apiRequestsCounter.increment();
+		}
 
-    // =========================================================================
-    // БЛОК 2: ТЕСТИ ДАТЧИКА (GAUGE TESTS)
-    // Умова: Після відкриття сесії значення зростає, після закриття - спадає
-    // =========================================================================
+		assertEquals(100.0, apiRequestsCounter.count(), "Лічильник повинен чітко зафіксувати 100 запитів");
+	}
 
-    @Test
-    @DisplayName("4. Gauge: Значення зростає на +1 при відкритті нової сесії користувача")
-    void testGaugeIncreasesOnSessionOpen() {
-        // Реєструємо Gauge, який стежить за значенням activeSessions
-        Gauge.builder("foodly.users.active.sessions", activeSessions, AtomicInteger::get)
-                .register(meterRegistry);
+	// =========================================================================
+	// БЛОК 2: ТЕСТИ ДАТЧИКА (GAUGE TESTS)
+	// Умова: Після відкриття сесії значення зростає, після закриття - спадає
+	// =========================================================================
 
-        // Користувач залогінився (відкриття сесії)
-        activeSessions.incrementAndGet();
+	@Test
+	@DisplayName("4. Gauge: Значення зростає на +1 при відкритті нової сесії користувача")
+	void testGaugeIncreasesOnSessionOpen() {
+		// Реєструємо Gauge, який стежить за значенням activeSessions
+		Gauge.builder("foodly.users.active.sessions", activeSessions, AtomicInteger::get).register(meterRegistry);
 
-        double gaugeValue = meterRegistry.get("foodly.users.active.sessions").gauge().value();
-        assertEquals(1.0, gaugeValue, "Значення Gauge має зрости до 1.0 після відкриття сесії");
-    }
+		// Користувач залогінився (відкриття сесії)
+		activeSessions.incrementAndGet();
 
-    @Test
-    @DisplayName("5. Gauge: Значення зменшується на -1 після закриття сесії (Log Out)")
-    void testGaugeDecreasesOnSessionClose() {
-        Gauge.builder("foodly.users.active.sessions", activeSessions, AtomicInteger::get)
-                .register(meterRegistry);
+		double gaugeValue = meterRegistry.get("foodly.users.active.sessions").gauge().value();
+		assertEquals(1.0, gaugeValue, "Значення Gauge має зрости до 1.0 після відкриття сесії");
+	}
 
-        // Імітуємо ситуацію: зайшло 2 користувача, потім 1 вийшов
-        activeSessions.incrementAndGet(); // +1
-        activeSessions.incrementAndGet(); // +1 (разом 2)
+	@Test
+	@DisplayName("5. Gauge: Значення зменшується на -1 після закриття сесії (Log Out)")
+	void testGaugeDecreasesOnSessionClose() {
+		Gauge.builder("foodly.users.active.sessions", activeSessions, AtomicInteger::get).register(meterRegistry);
 
-        // Користувач натиснув вихід / спрацював таймаут безпеки
-        activeSessions.decrementAndGet(); // -1
+		// Імітуємо ситуацію: зайшло 2 користувача, потім 1 вийшов
+		activeSessions.incrementAndGet(); // +1
+		activeSessions.incrementAndGet(); // +1 (разом 2)
 
-        double gaugeValue = meterRegistry.get("foodly.users.active.sessions").gauge().value();
-        assertEquals(1.0, gaugeValue, "Значення Gauge має впасти до 1.0 після закриття однієї з сесій");
-    }
+		// Користувач натиснув вихід / спрацював таймаут безпеки
+		activeSessions.decrementAndGet(); // -1
 
-    @Test
-    @DisplayName("6. Gauge: Значення повертається в 0, якщо всі відкриті сесії закриваються")
-    void testGaugeReturnsToZero() {
-        Gauge.builder("foodly.users.active.sessions", activeSessions, AtomicInteger::get)
-                .register(meterRegistry);
+		double gaugeValue = meterRegistry.get("foodly.users.active.sessions").gauge().value();
+		assertEquals(1.0, gaugeValue, "Значення Gauge має впасти до 1.0 після закриття однієї з сесій");
+	}
 
-        // Сесія відкрилась
-        activeSessions.incrementAndGet();
-        // Сесія закрилась
-        activeSessions.decrementAndGet();
+	@Test
+	@DisplayName("6. Gauge: Значення повертається в 0, якщо всі відкриті сесії закриваються")
+	void testGaugeReturnsToZero() {
+		Gauge.builder("foodly.users.active.sessions", activeSessions, AtomicInteger::get).register(meterRegistry);
 
-        double gaugeValue = meterRegistry.get("foodly.users.active.sessions").gauge().value();
-        assertEquals(0.0, gaugeValue, "Gauge повинен показувати 0, якщо немає жодної активної сесії");
-    }
+		// Сесія відкрилась
+		activeSessions.incrementAndGet();
+		// Сесія закрилась
+		activeSessions.decrementAndGet();
+
+		double gaugeValue = meterRegistry.get("foodly.users.active.sessions").gauge().value();
+		assertEquals(0.0, gaugeValue, "Gauge повинен показувати 0, якщо немає жодної активної сесії");
+	}
+
 }

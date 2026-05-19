@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import DishCard from './DishCard';
 import { getAllDishes, toggleDishAvailability } from '../services/dishService';
 import api from '../api/axios';
 import './MenuCatalog.css';
-import { CirclePlus } from 'lucide-react';
+import { CirclePlus, Info } from 'lucide-react';
+import { calculateRemainingCalories, getCaloriesTotal } from '../utils/nutritionUtils';
 
 const warningOverlayStyle = {
   position: 'fixed',
@@ -57,16 +58,22 @@ const normalizeAllergen = (value) =>
     .trim()
     .toLowerCase();
 
+const sortDishesByCalories = (dishList = []) =>
+  [...dishList].sort((left, right) => Number(left?.calories || 0) - Number(right?.calories || 0));
+
 // Об'єднуємо всі пропси в один аргумент
 const MenuCatalog = ({
   dishes: mockDishes,
   onAddToCart,
   showFavoritesOnly = false,
   onShowErrorToast,
+  cartItems = [],
+  nutritionSummary = { dailyCalorieIntake: 2000, deliveredCalories: 0 },
 }) => {
   const [dishes, setDishes] = useState([]);
   const [useFitMyDay, setUseFitMyDay] = useState(false);
-  const [remainingKcal, setRemainingKcal] = useState('500');
+  const [remainingKcal, setRemainingKcal] = useState('');
+  const [manualLimitEdited, setManualLimitEdited] = useState(false);
   const [sortOption, setSortOption] = useState('none');
   const [searchQuery, setSearchQuery] = useState('');
   const [favoriteIds, setFavoriteIds] = useState([]);
@@ -76,6 +83,27 @@ const MenuCatalog = ({
   const [loading, setLoading] = useState(true);
   const [, setError] = useState(null);
   const [availableAllergens, setAvailableAllergens] = useState([]);
+  const [fitDayNotice, setFitDayNotice] = useState('');
+
+  const cartCalories = useMemo(() => getCaloriesTotal(cartItems), [cartItems]);
+
+  const recommendedRemainingKcal = useMemo(
+    () =>
+      calculateRemainingCalories({
+        dailyCalorieIntake: nutritionSummary?.dailyCalorieIntake,
+        deliveredCalories: nutritionSummary?.deliveredCalories,
+        cartCalories,
+      }),
+    [cartCalories, nutritionSummary?.dailyCalorieIntake, nutritionSummary?.deliveredCalories]
+  );
+
+  const numericRemainingKcal = Number(remainingKcal);
+  const hasNumericRemainingKcal = remainingKcal !== '' && Number.isFinite(numericRemainingKcal);
+  const clampedRemainingKcal = useFitMyDay
+    ? Math.max(0, hasNumericRemainingKcal ? numericRemainingKcal : recommendedRemainingKcal)
+    : remainingKcal;
+  const isLowLimitMode = useFitMyDay && recommendedRemainingKcal <= 0;
+  const isFitDayInputLocked = useFitMyDay && recommendedRemainingKcal <= 0;
 
   // Helper function to get JWT token from localStorage
   const getAuthHeaders = () => {
@@ -135,6 +163,23 @@ const MenuCatalog = ({
     fetchUserAllergens();
   }, []);
 
+  useEffect(() => {
+    if (!useFitMyDay) {
+      return;
+    }
+
+    if (recommendedRemainingKcal <= 0) {
+      setRemainingKcal('0');
+      setManualLimitEdited(false);
+      return;
+    }
+
+    if (!manualLimitEdited || numericRemainingKcal <= 0) {
+      setRemainingKcal(String(recommendedRemainingKcal));
+      setManualLimitEdited(false);
+    }
+  }, [manualLimitEdited, numericRemainingKcal, recommendedRemainingKcal, useFitMyDay]);
+
   const mapSortOptionToParams = (option) => {
     const mapping = {
       proteins: 'proteins',
@@ -168,25 +213,47 @@ const MenuCatalog = ({
     const fetchDishes = async () => {
       try {
         setLoading(true);
-        const parsedKcal = remainingKcal === '' ? null : Number(remainingKcal);
-        const appliedKcal = useFitMyDay ? parsedKcal : null;
         const { sortBy } = mapSortOptionToParams(sortOption);
+        const appliedKcal = useFitMyDay && hasNumericRemainingKcal ? numericRemainingKcal : null;
 
         const data = await getAllDishes(appliedKcal, sortBy);
 
         setDishes(data);
         setAvailableAllergens(collectAllergens(data));
         setError(null);
+
+        if (isLowLimitMode) {
+          setFitDayNotice(
+            'You have already reached your daily calorie limit. Showing the lightest dishes in the catalog.'
+          );
+        } else {
+          setFitDayNotice('');
+        }
       } catch (err) {
         console.error('Помилка завантаження:', err);
-        setDishes(mockDishes || []);
+        const fallbackDishes = isLowLimitMode
+          ? sortDishesByCalories(mockDishes || [])
+          : mockDishes || [];
+        setDishes(fallbackDishes);
         setError('Could not load fresh menu. Showing offline version.');
+        setFitDayNotice(
+          isLowLimitMode
+            ? 'You have already reached your daily calorie limit. Showing the lightest dishes in the catalog.'
+            : ''
+        );
       } finally {
         setLoading(false);
       }
     };
     fetchDishes();
-  }, [useFitMyDay, remainingKcal, sortOption, mockDishes]);
+  }, [
+    hasNumericRemainingKcal,
+    isLowLimitMode,
+    mockDishes,
+    numericRemainingKcal,
+    sortOption,
+    useFitMyDay,
+  ]);
 
   const toggleAllergen = (allergen) => {
     setSelectedAllergens((prev) =>
@@ -307,7 +374,14 @@ const MenuCatalog = ({
       return !dishAllergens.some((allergen) => excludedAllergens.has(allergen));
     })
     .filter((dish) => dish.name.toLowerCase().includes(searchQuery.toLowerCase()))
-    .filter((dish) => (showFavoritesOnly ? favoriteIds.includes(dish.id) : true));
+    .filter((dish) => (showFavoritesOnly ? favoriteIds.includes(dish.id) : true))
+    .filter((dish) => {
+      if (!useFitMyDay || isLowLimitMode || !hasNumericRemainingKcal) {
+        return true;
+      }
+
+      return Number(dish.calories || 0) <= numericRemainingKcal;
+    });
 
   return (
     <div className="menu-catalog">
@@ -328,7 +402,10 @@ const MenuCatalog = ({
                 <input
                   type="checkbox"
                   checked={useFitMyDay}
-                  onChange={(e) => setUseFitMyDay(e.target.checked)}
+                  onChange={(e) => {
+                    setUseFitMyDay(e.target.checked);
+                    setManualLimitEdited(false);
+                  }}
                 />
                 <span>Fit my day</span>
               </label>
@@ -336,9 +413,15 @@ const MenuCatalog = ({
               <input
                 type="number"
                 className="menu-catalog__input"
-                value={remainingKcal}
-                onChange={(e) => setRemainingKcal(e.target.value)}
-                disabled={!useFitMyDay}
+                value={clampedRemainingKcal}
+                onChange={(e) => {
+                  const parsedValue = Number(e.target.value);
+                  setRemainingKcal(
+                    String(Number.isFinite(parsedValue) ? Math.max(0, parsedValue) : 0)
+                  );
+                  setManualLimitEdited(true);
+                }}
+                disabled={!useFitMyDay || isFitDayInputLocked}
                 placeholder="kcal limit"
               />
 
@@ -355,6 +438,18 @@ const MenuCatalog = ({
               </select>
             </div>
           </div>
+
+          {fitDayNotice && (
+            <div className="menu-catalog__fit-day-banner" role="status" aria-live="polite">
+              <div className="menu-catalog__fit-day-banner-icon" aria-hidden="true">
+                <Info size={18} />
+              </div>
+              <div className="menu-catalog__fit-day-banner-copy">
+                <strong>Fit my day</strong>
+                <span>{fitDayNotice}</span>
+              </div>
+            </div>
+          )}
 
           {availableAllergens.length > 0 && (
             <div className="allergen-tags">

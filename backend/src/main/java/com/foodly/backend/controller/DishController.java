@@ -35,11 +35,12 @@ public class DishController {
 	@GetMapping
 	public ResponseEntity<List<DishResponseDto>> getDishes(
 			@RequestParam(value = "remainingKcal", required = false) BigDecimal remainingKcal,
-			@RequestParam(value = "sortBy", required = false) String sortBy,
-			Authentication authentication) { // Додаємо об'єкт Authentication
-		boolean isManagerOrAdmin = authentication != null &&
-				(authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_MANAGER")) ||
-						authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN")));
+			@RequestParam(value = "sortBy", required = false) String sortBy, Authentication authentication) { // Додаємо
+																												// об'єкт
+																												// Authentication
+		boolean isManagerOrAdmin = authentication != null
+				&& (authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_MANAGER"))
+						|| authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN")));
 
 		List<DishResponseDto> dishes;
 
@@ -61,4 +62,5 @@ public class DishController {
 		String message = available ? "Dish is now available" : "Dish added to stop-list";
 		return ResponseEntity.ok(Map.of("message", message));
 	}
+
 }

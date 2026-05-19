@@ -66,7 +66,7 @@ const normalizeProfile = (data) => ({
   dailyCalorieIntake: data?.dailyCalorieIntake ?? 0,
 });
 
-const UserProfile = ({ onShowSuccessToast, onShowErrorToast }) => {
+const UserProfile = ({ onShowSuccessToast, onShowErrorToast, onProfileUpdated = null }) => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState(emptyForm);
   const [availableAllergens, setAvailableAllergens] = useState([]);
@@ -213,6 +213,15 @@ const UserProfile = ({ onShowSuccessToast, onShowErrorToast }) => {
         dailyCalorieIntake:
           dailyCalorieIntake ?? updatedProfile.data?.dailyCalorieIntake ?? prev.dailyCalorieIntake,
       }));
+
+      if (typeof onProfileUpdated === 'function') {
+        try {
+          await onProfileUpdated();
+        } catch (refreshError) {
+          console.error('Could not refresh nutrition summary after profile save', refreshError);
+        }
+      }
+
       onShowSuccessToast('Profile saved successfully!');
     } catch (error) {
       onShowErrorToast(error?.response?.data?.message || 'Could not save profile.');

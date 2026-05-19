@@ -5,7 +5,7 @@ import api from '../api/axios';
  */
 export const getNutritionLogs = async () => {
   try {
-    const response = await api.get('/api/nutrition/logs');
+    const response = await api.get('/nutrition/logs');
     return response;
   } catch (error) {
     console.error('Error fetching nutrition logs:', error);

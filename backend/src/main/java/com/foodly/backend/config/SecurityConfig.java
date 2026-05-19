@@ -29,6 +29,7 @@ import java.util.Arrays;
 public class SecurityConfig {
 
 	private final JwtAuthenticationFilter jwtAuthFilter;
+
 	private final CustomAccessDeniedHandler customAccessDeniedHandler;
 
 	@Bean

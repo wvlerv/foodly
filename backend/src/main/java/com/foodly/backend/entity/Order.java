@@ -42,7 +42,7 @@ public class Order {
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_id", nullable = false)
-	private User user;	// Клієнт, який зробив замовлення
+	private User user; // Клієнт, який зробив замовлення
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "courier_id", nullable = true)

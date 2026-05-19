@@ -11,34 +11,37 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/actuator-test")
 public class TestMetricsController {
 
-    private final DatabaseMetricsService databaseMetricsService;
-    private final ActiveSessionService activeSessionService;
+	private final DatabaseMetricsService databaseMetricsService;
 
-    public TestMetricsController(DatabaseMetricsService databaseMetricsService, ActiveSessionService activeSessionService) {
-        this.databaseMetricsService = databaseMetricsService;
-        this.activeSessionService = activeSessionService;
-    }
+	private final ActiveSessionService activeSessionService;
 
-    @PostMapping("/db")
-    public ResponseEntity<String> incrementDb() {
-        databaseMetricsService.incrementQueryCount();
-        return ResponseEntity.ok("db incremented");
-    }
+	public TestMetricsController(DatabaseMetricsService databaseMetricsService,
+			ActiveSessionService activeSessionService) {
+		this.databaseMetricsService = databaseMetricsService;
+		this.activeSessionService = activeSessionService;
+	}
 
-    @PostMapping("/session/increment")
-    public ResponseEntity<String> incrementSession(@RequestParam(defaultValue = "CLIENT") String role) {
-        activeSessionService.increment(role);
-        return ResponseEntity.ok("session incremented");
-    }
+	@PostMapping("/db")
+	public ResponseEntity<String> incrementDb() {
+		databaseMetricsService.incrementQueryCount();
+		return ResponseEntity.ok("db incremented");
+	}
 
-    @PostMapping("/session/decrement")
-    public ResponseEntity<String> decrementSession(@RequestParam(defaultValue = "CLIENT") String role) {
-        activeSessionService.decrement(role);
-        return ResponseEntity.ok("session decremented");
-    }
+	@PostMapping("/session/increment")
+	public ResponseEntity<String> incrementSession(@RequestParam(defaultValue = "CLIENT") String role) {
+		activeSessionService.increment(role);
+		return ResponseEntity.ok("session incremented");
+	}
 
-    @GetMapping("/admin-only")
-    public ResponseEntity<String> adminOnly() {
-        return ResponseEntity.ok("admin area");
-    }
+	@PostMapping("/session/decrement")
+	public ResponseEntity<String> decrementSession(@RequestParam(defaultValue = "CLIENT") String role) {
+		activeSessionService.decrement(role);
+		return ResponseEntity.ok("session decremented");
+	}
+
+	@GetMapping("/admin-only")
+	public ResponseEntity<String> adminOnly() {
+		return ResponseEntity.ok("admin area");
+	}
+
 }

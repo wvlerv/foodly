@@ -14,29 +14,32 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class AdminSeeder implements CommandLineRunner {
 
-    private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
+	private final UserRepository userRepository;
 
-    @Override
-    public void run(String... args) throws Exception {
-        String adminEmail = "admin@gmail.com";
-        if (!userRepository.existsByEmail(adminEmail)) {
-            log.info("Creating default admin user...");
+	private final PasswordEncoder passwordEncoder;
 
-            User admin = User.builder()
-                    .email(adminEmail)
-                    .firstName("Admin")
-                    .lastName("Global")
-                    .username("admin")
-                    .password(passwordEncoder.encode("adminUlt4#"))
-                    .role(Role.ADMIN)
-                    .isBanned(false)
-                    .build();
+	@Override
+	public void run(String... args) throws Exception {
+		String adminEmail = "admin@gmail.com";
+		if (!userRepository.existsByEmail(adminEmail)) {
+			log.info("Creating default admin user...");
 
-            userRepository.save(admin);
-            log.info("Admin user successfully created! Email: {}, Password: admin123", adminEmail);
-        } else {
-            log.info("Admin user already exists. Skipping initialization.");
-        }
-    }
+			User admin = User.builder()
+				.email(adminEmail)
+				.firstName("Admin")
+				.lastName("Global")
+				.username("admin")
+				.password(passwordEncoder.encode("adminUlt4#"))
+				.role(Role.ADMIN)
+				.isBanned(false)
+				.build();
+
+			userRepository.save(admin);
+			log.info("Admin user successfully created! Email: {}, Password: admin123", adminEmail);
+		}
+		else {
+			log.info("Admin user already exists. Skipping initialization.");
+		}
+	}
+
 }

@@ -60,7 +60,7 @@ public class UserService {
 
 	public Map<String, String> authenticateUser(LoginRequest loginRequest) {
 		User user = userRepository.findByEmail(loginRequest.getEmail())
-				.orElseThrow(() -> new BadCredentialsException("Invalid email or password"));
+			.orElseThrow(() -> new BadCredentialsException("Invalid email or password"));
 
 		if (user.isBanned()) {
 			log.warn("LOG-05: Login rejected - User {} is banned", maskEmail(user.getEmail()));
@@ -73,10 +73,7 @@ public class UserService {
 
 		String token = jwtUtils.generateToken(authentication.getName());
 
-		return Map.of(
-				"token", token,
-				"role", user.getRole().name()
-		);
+		return Map.of("token", token, "role", user.getRole().name());
 	}
 
 	public void logoutUser(String authHeader) {
@@ -92,7 +89,8 @@ public class UserService {
 			blacklistService.blacklistToken(token, expirationTime);
 
 			log.info("LOG-11: Token successfully added to blacklist for logout.");
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			log.error("LOG-12: Error processing token during logout: {}", e.getMessage());
 			throw new RuntimeException("Failed to process token during logout", e);
 		}

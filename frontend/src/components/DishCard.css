@@ -14,9 +14,9 @@
   overflow: hidden;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
   transition:
-          transform 0.22s ease,
-          box-shadow 0.22s ease,
-          border-color 0.22s ease;
+    transform 0.22s ease,
+    box-shadow 0.22s ease,
+    border-color 0.22s ease;
 }
 
 .dish-card:hover {
@@ -269,9 +269,15 @@
   transition: width 0.3s ease;
 }
 
-.protein-bar { background: #ef4444; }
-.fat-bar { background: #f59e0b; }
-.carbs-bar { background: #3b82f6; }
+.protein-bar {
+  background: #ef4444;
+}
+.fat-bar {
+  background: #f59e0b;
+}
+.carbs-bar {
+  background: #3b82f6;
+}
 
 /* ==========================================================================
    5. КНОПКИ (ADD TO CART & MANAGER STOP-LIST)
@@ -351,28 +357,61 @@
 }
 
 @media (min-width: 769px) {
-  .dish-card__name { font-size: 1.12rem; }
-  .dish-card__price { font-size: 1.4rem; }
+  .dish-card__name {
+    font-size: 1.12rem;
+  }
+  .dish-card__price {
+    font-size: 1.4rem;
+  }
 }
 
 @media (max-width: 768px) {
-  .dish-card__body { padding: 18px; }
-  .dish-card__name { font-size: 1rem; }
-  .dish-card__description { font-size: 0.88rem; }
-  .dish-card__price { font-size: 1.2rem; }
+  .dish-card__body {
+    padding: 18px;
+  }
+  .dish-card__name {
+    font-size: 1rem;
+  }
+  .dish-card__description {
+    font-size: 0.88rem;
+  }
+  .dish-card__price {
+    font-size: 1.2rem;
+  }
 }
 
 @media (max-width: 480px) {
-  .dish-card__body { padding: 16px; }
-  .dish-card__name { font-size: 0.98rem; }
-  .dish-card__description { font-size: 0.86rem; }
-  .dish-card__price { font-size: 1.15rem; }
-  .dish-card__allergen-badge { font-size: 0.72rem; padding: 2px 6px; }
+  .dish-card__body {
+    padding: 16px;
+  }
+  .dish-card__name {
+    font-size: 0.98rem;
+  }
+  .dish-card__description {
+    font-size: 0.86rem;
+  }
+  .dish-card__price {
+    font-size: 1.15rem;
+  }
+  .dish-card__allergen-badge {
+    font-size: 0.72rem;
+    padding: 2px 6px;
+  }
 }
 
 @media (max-width: 359px) {
-  .dish-card__body { padding: 12px; }
-  .dish-card__description { font-size: 0.82rem; }
-  .dish-card__meta-row { gap: 8px; margin-bottom: 10px; }
-  .dish-card__allergen-badge { font-size: 0.68rem; padding: 2px 5px; }
+  .dish-card__body {
+    padding: 12px;
+  }
+  .dish-card__description {
+    font-size: 0.82rem;
+  }
+  .dish-card__meta-row {
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .dish-card__allergen-badge {
+    font-size: 0.68rem;
+    padding: 2px 5px;
+  }
 }

@@ -28,12 +28,14 @@ import java.util.Optional;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 	private final JwtUtils jwtUtils;
+
 	private final TokenBlacklistService blacklistService;
+
 	private final UserRepository userRepository;
 
 	@Override
 	protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response,
-	                                @NonNull FilterChain filterChain) throws ServletException, IOException {
+			@NonNull FilterChain filterChain) throws ServletException, IOException {
 		try {
 			String jwt = parseJwt(request);
 			if (jwt != null && !blacklistService.isBlacklisted(jwt) && jwtUtils.validateToken(jwt)) {
@@ -55,8 +57,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 					log.debug("LOG-06: JWT validated for user: {}", email);
 					String roleWithPrefix = "ROLE_" + user.getRole().name();
 					List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(roleWithPrefix));
-					UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-							email, null, authorities);
+					UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(email,
+							null, authorities);
 
 					authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 					SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -86,4 +88,5 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		}
 		return null;
 	}
+
 }

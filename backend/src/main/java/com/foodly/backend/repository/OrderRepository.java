@@ -20,7 +20,8 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
 	// Знайти всі замовлення певного кур'єра за часом створення
 	List<Order> findByCourierOrderByCreatedAtDesc(User courier);
 
-	@EntityGraph(attributePaths = {"user"})
+	@EntityGraph(attributePaths = { "user" })
 	// Знайти всі замовлення з певним статусом, які ще не закріплені за жодним кур'єром
 	List<Order> findByStatusAndCourierIsNullOrderByCreatedAtDesc(OrderStatus status);
+
 }
