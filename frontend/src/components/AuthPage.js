@@ -76,8 +76,8 @@ const AuthPage = ({ onLoginSuccess, onShowErrorToast }) => {
 
     try {
       if (isLogin) {
-        await authService.login(formData.email, formData.password);
-        onLoginSuccess();
+        const data = await authService.login(formData.email, formData.password);
+        onLoginSuccess(data.role);
         navigate('/menu');
       } else {
         await authService.register({
@@ -108,6 +108,8 @@ const AuthPage = ({ onLoginSuccess, onShowErrorToast }) => {
         setServerError('This email is already registered. Please try logging in.');
       } else if (err.response?.status === 401) {
         setServerError('Invalid email or password. Please try again.');
+      } else if (err.response?.status === 403) {
+        setServerError(backendMessage || 'Your account has been banned. Please contact support.');
       } else {
         setServerError('Server is unreachable. Please check your connection or try again later.');
       }

@@ -7,7 +7,7 @@ import { LogOut, LogIn } from 'lucide-react';
 /**
  * Header Component - Navigation and branding for Foodly
  */
-const Header = ({ cartCount, isAuthenticated, onLogout }) => {
+const Header = ({ cartCount, isAuthenticated, userRole, onLogout }) => {
   const location = useLocation();
   const getActiveClass = (path) => (location.pathname === path ? 'active' : '');
 
@@ -31,6 +31,11 @@ const Header = ({ cartCount, isAuthenticated, onLogout }) => {
           <Link to="/stats" className={`header__nav-link ${getActiveClass('/stats')}`}>
             Analytics
           </Link>
+          {isAuthenticated && userRole === 'ADMIN' && (
+            <Link to="/admin" className={`header__nav-link admin-link ${getActiveClass('/admin')}`}>
+              Admin Panel
+            </Link>
+          )}
         </nav>
 
         {/* Right Icons */}
