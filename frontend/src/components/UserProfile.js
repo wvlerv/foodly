@@ -11,6 +11,8 @@ import {
   Sparkles,
   Target,
   Users,
+  KeyRound,
+  Trash2,
 } from 'lucide-react';
 import './UserProfile.css';
 
@@ -73,8 +75,12 @@ const UserProfile = ({ onShowSuccessToast, onShowErrorToast, onProfileUpdated = 
   const [activeTab, setActiveTab] = useState('personal');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [passwordData, setPasswordData] = useState({ oldPassword: '', newPassword: '' });
+  const [changingPassword, setChangingPassword] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
-  // Отримуємо роль користувача
   const userRole = localStorage.getItem('userRole') || '';
 
   useEffect(() => {
@@ -153,7 +159,6 @@ const UserProfile = ({ onShowSuccessToast, onShowErrorToast, onProfileUpdated = 
     });
   };
 
-  // НАШ ОНОВЛЕНИЙ МЕТОД ВАЛІДАЦІЇ (ОДИН, БЕЗ ДУБЛІВ):
   const validate = () => {
     if (userRole === 'COURIER') return true;
 
@@ -230,6 +235,53 @@ const UserProfile = ({ onShowSuccessToast, onShowErrorToast, onProfileUpdated = 
     }
   };
 
+  const handleChangePasswordSubmit = async (e) => {
+    e.preventDefault();
+    if (passwordData.newPassword.length < 6) {
+      onShowErrorToast('New password must be at least 6 characters long');
+      return;
+    }
+
+    try {
+      setChangingPassword(true);
+      const token = localStorage.getItem('token');
+      await api.post('/profile/change-password', passwordData, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      onShowSuccessToast('Password updated successfully!');
+      setShowPasswordModal(false);
+      setPasswordData({ oldPassword: '', newPassword: '' });
+    } catch (error) {
+      onShowErrorToast(
+        error.response?.data?.message || error.response?.data || 'Failed to change password'
+      );
+    } finally {
+      setChangingPassword(false);
+    }
+  };
+
+  const handleDeleteAccountClick = () => {
+    setShowDeleteModal(true);
+  };
+  const confirmDeleteAccount = async () => {
+    try {
+      setDeleting(true);
+      const token = localStorage.getItem('token');
+      await api.delete('/profile/delete', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      localStorage.clear();
+      setShowDeleteModal(false);
+      onShowSuccessToast('Your account has been deleted. Goodbye! 👋');
+      navigate('/', { replace: true });
+    } catch (error) {
+      onShowErrorToast(error.response?.data?.message || 'Could not delete account.');
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="profile-page profile-page--loading">
@@ -238,7 +290,6 @@ const UserProfile = ({ onShowSuccessToast, onShowErrorToast, onProfileUpdated = 
     );
   }
 
-  // Визначаємо, чи потрібно нам взагалі показувати праву картку summary
   const showSummaryCard =
     userRole !== 'COURIER' || formData.firstName || formData.lastName || formData.username;
 
@@ -326,6 +377,26 @@ const UserProfile = ({ onShowSuccessToast, onShowErrorToast, onProfileUpdated = 
                     <input type="email" name="email" value={formData.email} disabled />
                   </label>
                 </div>
+
+                <div className="profile-account-actions">
+                  <h3>Account Settings</h3>
+                  <div className="account-actions-btns">
+                    <button
+                      type="button"
+                      className="profile-action-btn password-btn"
+                      onClick={() => setShowPasswordModal(true)}
+                    >
+                      <KeyRound size={16} /> Change Password
+                    </button>
+                    <button
+                      type="button"
+                      className="profile-action-btn delete-btn"
+                      onClick={handleDeleteAccountClick}
+                    >
+                      <Trash2 size={16} /> Delete Account
+                    </button>
+                  </div>
+                </div>
               </div>
             )}
 
@@ -345,7 +416,6 @@ const UserProfile = ({ onShowSuccessToast, onShowErrorToast, onProfileUpdated = 
                       placeholder="28"
                     />
                   </label>
-
                   <label className="profile-field">
                     <span>
                       <Users size={16} /> Gender
@@ -360,7 +430,6 @@ const UserProfile = ({ onShowSuccessToast, onShowErrorToast, onProfileUpdated = 
                     </select>
                   </label>
                 </div>
-
                 <div className="profile-grid profile-grid--two">
                   <label className="profile-field">
                     <span>
@@ -375,7 +444,6 @@ const UserProfile = ({ onShowSuccessToast, onShowErrorToast, onProfileUpdated = 
                       placeholder="175"
                     />
                   </label>
-
                   <label className="profile-field">
                     <span>
                       <HeartPulse size={16} /> Weight (kg)
@@ -391,7 +459,6 @@ const UserProfile = ({ onShowSuccessToast, onShowErrorToast, onProfileUpdated = 
                     />
                   </label>
                 </div>
-
                 <label className="profile-field">
                   <span>
                     <Activity size={16} /> Activity multiplier
@@ -409,7 +476,6 @@ const UserProfile = ({ onShowSuccessToast, onShowErrorToast, onProfileUpdated = 
                     ))}
                   </select>
                 </label>
-
                 <label className="profile-field">
                   <span>
                     <Target size={16} /> Goal
@@ -423,7 +489,6 @@ const UserProfile = ({ onShowSuccessToast, onShowErrorToast, onProfileUpdated = 
                     ))}
                   </select>
                 </label>
-
                 <div className="profile-allergens">
                   <div className="profile-allergens__header">
                     <Sparkles size={18} />
@@ -431,7 +496,7 @@ const UserProfile = ({ onShowSuccessToast, onShowErrorToast, onProfileUpdated = 
                   </div>
                   <div className="profile-allergens__grid">
                     {availableAllergens
-                      .filter((allergen) => allergen !== 'string')
+                      .filter((a) => a !== 'string')
                       .map((allergen) => {
                         const active = formData.allergens.includes(allergen);
                         return (
@@ -457,7 +522,6 @@ const UserProfile = ({ onShowSuccessToast, onShowErrorToast, onProfileUpdated = 
           </form>
         </section>
 
-        {/* Розумне відображення правої картки */}
         {showSummaryCard && (
           <aside className="profile-card profile-summary-card">
             {(formData.firstName || formData.lastName || formData.username) && (
@@ -468,30 +532,21 @@ const UserProfile = ({ onShowSuccessToast, onShowErrorToast, onProfileUpdated = 
                 <span>{formData.username ? `@${formData.username}` : 'User Name'}</span>
               </div>
             )}
-
             {userRole !== 'COURIER' && (
               <>
                 <div className="profile-card__title">
                   <Flame size={20} />
                   <h2>Daily Goal</h2>
                 </div>
-
                 <div className="profile-summary__goal">
                   {Number(formData.dailyCalorieIntake) > 0 ? (
-                    <>
-                      <strong>
-                        Your Daily Goal: {Math.round(Number(formData.dailyCalorieIntake))} kcal
-                      </strong>
-                      <p>Calculated from your profile and activity level.</p>
-                    </>
+                    <strong>
+                      Your Daily Goal: {Math.round(Number(formData.dailyCalorieIntake))} kcal
+                    </strong>
                   ) : (
-                    <>
-                      <strong>Fill the form to calculate your daily goal</strong>
-                      <p>We will show your daily calorie intake here after saving the profile.</p>
-                    </>
+                    <strong>Fill the form to calculate your daily goal</strong>
                   )}
                 </div>
-
                 <div className="profile-summary__list">
                   <div className="profile-summary__row">
                     <span>Age</span>
@@ -518,26 +573,89 @@ const UserProfile = ({ onShowSuccessToast, onShowErrorToast, onProfileUpdated = 
                     <strong>{formData.target || '-'}</strong>
                   </div>
                 </div>
-
-                {formData.allergens.filter((a) => a !== 'string').length > 0 && (
-                  <div className="profile-summary__allergens">
-                    <span className="profile-summary__label">Selected allergens</span>
-                    <div className="profile-summary__chips">
-                      {formData.allergens
-                        .filter((a) => a !== 'string')
-                        .map((allergen) => (
-                          <span key={allergen} className="summary-chip">
-                            {allergen}
-                          </span>
-                        ))}
-                    </div>
-                  </div>
-                )}
               </>
             )}
           </aside>
         )}
       </div>
+      {showPasswordModal && (
+        <div className="profile-modal-overlay" onClick={() => setShowPasswordModal(false)}>
+          <div className="profile-modal" onClick={(e) => e.stopPropagation()}>
+            <h2>Change Password</h2>
+            <form onSubmit={handleChangePasswordSubmit}>
+              <label className="profile-field">
+                <span>Old Password</span>
+                <input
+                  type="password"
+                  required
+                  value={passwordData.oldPassword}
+                  onChange={(e) =>
+                    setPasswordData({ ...passwordData, oldPassword: e.target.value })
+                  }
+                  placeholder="Enter old password"
+                />
+              </label>
+              <label className="profile-field">
+                <span>New Password</span>
+                <input
+                  type="password"
+                  required
+                  value={passwordData.newPassword}
+                  onChange={(e) =>
+                    setPasswordData({ ...passwordData, newPassword: e.target.value })
+                  }
+                  placeholder="Minimum 6 characters"
+                />
+              </label>
+              <div className="modal-buttons">
+                <button
+                  type="button"
+                  className="modal-btn modal-btn--cancel"
+                  onClick={() => {
+                    setShowPasswordModal(false);
+                    setPasswordData({ oldPassword: '', newPassword: '' });
+                  }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="modal-btn modal-btn--submit"
+                  disabled={changingPassword}
+                >
+                  {changingPassword ? 'Updating...' : 'Update Password'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+      {showDeleteModal && (
+        <div className="profile-modal-overlay" onClick={() => setShowDeleteModal(false)}>
+          <div className="profile-modal" onClick={(e) => e.stopPropagation()}>
+            <h2>Are you sure you want to delete your account?</h2>
+            <p className="profile-modal-warning-text">This action cannot be undone.</p>
+            <div className="modal-buttons">
+              <button
+                type="button"
+                className="modal-btn modal-btn--cancel"
+                onClick={() => setShowDeleteModal(false)}
+                disabled={deleting}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="modal-btn modal-btn--submit delete-confirm-btn"
+                onClick={confirmDeleteAccount}
+                disabled={deleting}
+              >
+                {deleting ? 'Deleting...' : 'Delete'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

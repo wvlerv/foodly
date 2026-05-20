@@ -10,12 +10,14 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.SQLRestriction;
 
 /**
  * Entity class representing a user in the application.
  */
 @Entity
 @Table(name = "users")
+@SQLRestriction("is_deleted = false")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -44,6 +46,10 @@ public class User {
 
 	@Enumerated(EnumType.STRING)
 	private Role role;
+
+	@Column(name = "is_deleted", nullable = false, columnDefinition = "boolean default false")
+	@Builder.Default
+	private boolean isDeleted = false;
 
 	@Column(nullable = false)
 	@Builder.Default

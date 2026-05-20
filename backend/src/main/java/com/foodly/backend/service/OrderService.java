@@ -178,7 +178,7 @@ public class OrderService {
 			.paymentMethod(order.getPaymentMethod())
 			.status(order.getStatus() != null ? order.getStatus().name() : null)
 			.totalPrice(order.getTotalPrice())
-			.clientName(order.getUser().getFirstName())
+			.clientName(order.getUser() != null ? order.getUser().getFirstName() : "Deleted User")
 			.calories(calories)
 			.proteins(proteins)
 			.fats(fats)
